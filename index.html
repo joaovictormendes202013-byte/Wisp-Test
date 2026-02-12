@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHADOW BULLET HELL - FUNCIONAL</title>
+    <title>SHADOW BULLET HELL - DROPS & INVENTÁRIO</title>
     <style>
         * {
             margin: 0;
@@ -38,7 +38,6 @@
             width: 100%;
             height: 100%;
             display: block;
-            background: #1a2a3a;
         }
 
         .screen {
@@ -74,14 +73,6 @@
             letter-spacing: 8px;
         }
 
-        .title-sub {
-            font-size: 24px;
-            color: #fff;
-            margin-bottom: 60px;
-            text-transform: uppercase;
-            letter-spacing: 12px;
-        }
-
         @keyframes glowPulse {
             0%, 100% { text-shadow: 0 0 30px #8a2be2, 0 0 60px #4a0080, 0 0 100px #ffd700; }
             50% { text-shadow: 0 0 50px #ffd700, 0 0 100px #8a2be2, 0 0 150px #4a0080; }
@@ -104,20 +95,12 @@
             transition: all 0.3s;
             text-transform: uppercase;
             letter-spacing: 4px;
-            position: relative;
-            overflow: hidden;
         }
 
         .menu-btn.primary {
             background: linear-gradient(45deg, #ffd700, #ff8c00);
             color: #000;
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-        }
-
-        .menu-btn:not(.primary) {
-            background: rgba(0,0,0,0.7);
-            color: white;
-            border: 2px solid #8a2be2;
         }
 
         .menu-btn:hover {
@@ -162,18 +145,7 @@
             font-weight: bold;
         }
 
-        .race-desc {
-            color: #ccc;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .race-stats {
-            color: #8a2be2;
-            font-weight: bold;
-        }
-
-        /* UI do Lobby */
+        /* Lobby UI */
         .lobby-ui {
             position: absolute;
             bottom: 30px;
@@ -226,26 +198,18 @@
             border-radius: 20px;
             padding: 30px;
             z-index: 300;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translate(-50%, 100px); opacity: 0; }
-            to { transform: translate(-50%, 0); opacity: 1; }
         }
 
         .dialog-npc-name {
             font-size: 28px;
             color: #ffd700;
             margin-bottom: 15px;
-            text-transform: uppercase;
         }
 
         .dialog-text {
             color: white;
             font-size: 18px;
             margin-bottom: 25px;
-            line-height: 1.5;
         }
 
         .dialog-options {
@@ -306,7 +270,6 @@
             background: #330000;
             border-radius: 15px;
             overflow: hidden;
-            border: 1px solid #ff0000;
         }
 
         #bossHealthFill {
@@ -322,7 +285,6 @@
             background: #330000;
             border-radius: 10px;
             overflow: hidden;
-            border: 1px solid #ffd700;
         }
 
         #playerHealthFill {
@@ -330,6 +292,54 @@
             width: 100%;
             background: linear-gradient(90deg, #00ff00, #00cc00);
             transition: width 0.2s;
+        }
+
+        /* Inventário */
+        .inventory-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            background: rgba(0,0,0,0.95);
+            border: 3px solid #ffd700;
+            border-radius: 20px;
+            padding: 30px;
+            z-index: 400;
+            color: white;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .inventory-slot {
+            background: rgba(138,43,226,0.2);
+            border: 2px solid #8a2be2;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 100px;
+        }
+
+        .inventory-slot:hover {
+            background: rgba(138,43,226,0.5);
+            border-color: #ffd700;
+            transform: scale(1.05);
+        }
+
+        .equipment-slot {
+            background: rgba(255,215,0,0.2);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            min-height: 100px;
         }
 
         .version {
@@ -349,12 +359,10 @@
             color: white;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s;
         }
 
         .back-btn:hover {
             background: #ff0000;
-            transform: scale(1.1);
         }
 
         .victory-screen, .completion-screen {
@@ -370,12 +378,6 @@
             color: white;
             z-index: 400;
             min-width: 500px;
-        }
-
-        .rewards {
-            margin: 30px 0;
-            font-size: 20px;
-            line-height: 2;
         }
 
         #ui {
@@ -399,16 +401,15 @@
         <!-- Tela de Título -->
         <div id="titleScreen" class="screen active">
             <div class="title-logo">SHADOW BULLET HELL</div>
-            <div class="title-sub">RPG × Bullet Hell</div>
+            <div class="title-sub">RPG × Bullet Hell × DROPS</div>
             
             <div class="menu-buttons">
                 <button class="menu-btn primary" onclick="startGame()">▶ INICIAR JORNADA</button>
                 <button class="menu-btn" onclick="showCharacterSelect()">📋 SELECIONAR RAÇA</button>
-                <button class="menu-btn" onclick="alert('⚙ Opções em desenvolvimento!')">⚙ OPÇÕES</button>
-                <button class="menu-btn" onclick="alert('📜 Shadow Bullet Hell RPG\nVersão 1.0.0\nCriado por: Você!')">📜 CRÉDITOS</button>
+                <button class="menu-btn" onclick="showInventory()">🎒 INVENTÁRIO</button>
             </div>
             
-            <div class="version">v1.0.0 - Era das Sombras</div>
+            <div class="version">v2.0 - Sistema de Drops e Itens</div>
         </div>
         
         <!-- Tela de Seleção de Raça -->
@@ -418,26 +419,22 @@
                 <div class="race-card" onclick="selectRace('shadowMonarch')">
                     <div class="race-icon">👑</div>
                     <div class="race-name">Shadow Monarch</div>
-                    <div class="race-desc">Rei das Sombras - Dano +50%</div>
-                    <div class="race-stats">ATK: ⭐⭐⭐⭐⭐ | VIDA: ⭐⭐⭐</div>
+                    <div class="race-desc">Dano +50% | Drop +20%</div>
                 </div>
                 <div class="race-card" onclick="selectRace('quincy')">
                     <div class="race-icon">🏹</div>
-                    <div class="race-name">Quincy Vollständig</div>
-                    <div class="race-desc">Arqueiro Celestial - Velocidade +30%</div>
-                    <div class="race-stats">ATK: ⭐⭐⭐⭐ | VIDA: ⭐⭐</div>
+                    <div class="race-name">Quincy</div>
+                    <div class="race-desc">Velocidade +30% | Crítico +15%</div>
                 </div>
                 <div class="race-card" onclick="selectRace('hollow')">
                     <div class="race-icon">👹</div>
                     <div class="race-name">Vasto Lorde</div>
-                    <div class="race-desc">Hollow Supremo - Vida +50%</div>
-                    <div class="race-stats">ATK: ⭐⭐⭐ | VIDA: ⭐⭐⭐⭐</div>
+                    <div class="race-desc">Vida +50% | Regeneração</div>
                 </div>
                 <div class="race-card" onclick="selectRace('joestar')">
                     <div class="race-icon">🌟</div>
                     <div class="race-name">Joestar</div>
-                    <div class="race-desc">Linhagem Heróica - Dano +30%</div>
-                    <div class="race-stats">ATK: ⭐⭐⭐⭐ | VIDA: ⭐⭐⭐</div>
+                    <div class="race-desc">Especial +30% | Sorte +20%</div>
                 </div>
             </div>
             <button class="back-btn" onclick="backToTitle()">VOLTAR</button>
@@ -450,12 +447,14 @@
                     <span id="lobbyPlayerName">Shadow Monarch</span>
                     <span id="lobbyPlayerLevel">Nível 1</span>
                     <span id="lobbyPlayerCoins">💰 500</span>
+                    <span id="lobbyPlayerWeapon">⚔️ Espada Inicial</span>
                 </div>
                 
                 <div class="npc-hint">
                     <span class="keybind">[E]</span> Falar com NPC
                     <span class="keybind">[WASD]</span> Mover
-                    <span class="keybind">[ESC]</span> Voltar ao menu
+                    <span class="keybind">[I]</span> Inventário
+                    <span class="keybind">[ESC]</span> Menu
                 </div>
             </div>
             
@@ -472,6 +471,7 @@
                 <div class="dungeon-info">
                     <span id="dungeonName">CAVERNA</span>
                     <span id="dungeonFloor">Andar 1/5</span>
+                    <span id="dungeonKills">💀 0/5</span>
                 </div>
                 
                 <div id="bossHealthContainer" class="boss-health hidden">
@@ -479,6 +479,41 @@
                         <div id="bossHealthFill"></div>
                     </div>
                 </div>
+                
+                <div id="dropMessage" style="color: #ffd700; margin-top: 10px; font-size: 18px;"></div>
+            </div>
+        </div>
+        
+        <!-- Painel de Inventário -->
+        <div id="inventoryPanel" class="inventory-panel hidden">
+            <h1 style="color: #ffd700; text-align: center; margin-bottom: 20px;">🎒 INVENTÁRIO</h1>
+            
+            <div style="display: flex; gap: 30px;">
+                <!-- Equipamentos -->
+                <div style="flex: 1;">
+                    <h3 style="color: #ffd700; margin-bottom: 15px;">⚔️ EQUIPADOS</h3>
+                    <div id="equipmentSlots" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="equipment-slot" id="weaponSlot">
+                            <div style="font-size: 24px;">⚔️</div>
+                            <div id="equippedWeaponName">Nenhuma</div>
+                        </div>
+                        <div class="equipment-slot" id="armorSlot">
+                            <div style="font-size: 24px;">🛡️</div>
+                            <div id="equippedArmorName">Nenhuma</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Itens do Inventário -->
+                <div style="flex: 2;">
+                    <h3 style="color: #ffd700; margin-bottom: 15px;">📦 ITENS</h3>
+                    <div id="inventoryGrid" class="inventory-grid"></div>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                <span>💰 Moedas: <span id="inventoryCoins">500</span></span>
+                <button class="menu-btn" onclick="closeInventory()" style="padding: 10px 20px; font-size: 16px;">FECHAR</button>
             </div>
         </div>
         
@@ -492,11 +527,60 @@
                 <span id="healthText">100/100</span>
             </div>
             <div style="margin-top: 10px;">💰 <span id="coinsText">500</span></div>
-            <div>🗡️ Dano: <span id="damageText">20</span></div>
+            <div>⚔️ Dano: <span id="damageText">20</span></div>
+            <div>🛡️ Defesa: <span id="defenseText">0</span></div>
         </div>
     </div>
 
     <script>
+        // ============= SISTEMA DE ITENS =============
+        const ITEMS = {
+            // Armas
+            'Espada Inicial': { type: 'weapon', damage: 20, value: 50, emoji: '⚔️', rarity: 'comum' },
+            'Espada Longa': { type: 'weapon', damage: 35, value: 150, emoji: '⚔️', rarity: 'incomum' },
+            'Lâmina Sombria': { type: 'weapon', damage: 50, value: 300, emoji: '🗡️', rarity: 'raro' },
+            'Excalibur': { type: 'weapon', damage: 100, value: 1000, emoji: '⚔️✨', rarity: 'lendário' },
+            'Espada do Rei': { type: 'weapon', damage: 75, value: 500, emoji: '👑', rarity: 'épico' },
+            
+            // Armaduras
+            'Armadura de Couro': { type: 'armor', defense: 10, value: 100, emoji: '🛡️', rarity: 'comum' },
+            'Armadura de Ferro': { type: 'armor', defense: 20, value: 250, emoji: '🛡️', rarity: 'incomum' },
+            'Armadura das Sombras': { type: 'armor', defense: 35, value: 500, emoji: '🛡️🌑', rarity: 'raro' },
+            'Armadura Sagrada': { type: 'armor', defense: 50, value: 800, emoji: '🛡️✨', rarity: 'lendário' },
+            
+            // Poções
+            'Poção de Vida': { type: 'consumable', heal: 50, value: 50, emoji: '🧪', rarity: 'comum' },
+            'Poção de Vida Grande': { type: 'consumable', heal: 100, value: 100, emoji: '🧪✨', rarity: 'raro' },
+            
+            // Drops especiais
+            'Fragmento Sombrio': { type: 'material', value: 200, emoji: '💎', rarity: 'raro' },
+            'Essência do Abismo': { type: 'material', value: 500, emoji: '🔮', rarity: 'épico' },
+            'Coração do Dragão': { type: 'material', value: 1000, emoji: '❤️🔥', rarity: 'lendário' }
+        };
+
+        // Drops por tipo de inimigo
+        const DROP_TABLES = {
+            'Slime': [
+                { item: 'Poção de Vida', chance: 0.3 },
+                { item: 'Fragmento Sombrio', chance: 0.1 }
+            ],
+            'Rei Slime': [
+                { item: 'Espada Longa', chance: 0.5 },
+                { item: 'Poção de Vida Grande', chance: 0.4 },
+                { item: 'Essência do Abismo', chance: 0.2 }
+            ],
+            'Espírito da Floresta': [
+                { item: 'Armadura de Ferro', chance: 0.5 },
+                { item: 'Poção de Vida Grande', chance: 0.3 },
+                { item: 'Fragmento Sombrio', chance: 0.3 }
+            ],
+            'Dragão Ancião': [
+                { item: 'Excalibur', chance: 0.2 },
+                { item: 'Armadura Sagrada', chance: 0.2 },
+                { item: 'Coração do Dragão', chance: 0.4 }
+            ]
+        };
+
         // ============= VARIÁVEIS GLOBAIS =============
         let canvas, ctx;
         let currentScreen = 'title';
@@ -506,6 +590,7 @@
         let keys = {};
         let isMouseDown = false;
         let animationFrame;
+        let dropMessageTimer = 0;
 
         // ============= CLASSE DO JOGADOR =============
         class Player {
@@ -517,28 +602,33 @@
                 this.expToNext = 100;
                 this.health = 100;
                 this.maxHealth = 100;
-                this.damage = 20;
+                this.baseDamage = 20;
+                this.baseDefense = 0;
                 this.speed = 7;
                 this.coins = 500;
                 this.x = 600;
                 this.y = 400;
                 this.bullets = [];
                 
-                this.applyRaceBonus();
+                // Inventário e equipamentos
+                this.inventory = { 'Espada Inicial': 1, 'Poção de Vida': 3 };
+                this.equipment = {
+                    weapon: 'Espada Inicial',
+                    armor: null
+                };
                 
-                // Atualizar UI
-                document.getElementById('coinsText').textContent = this.coins;
-                document.getElementById('damageText').textContent = this.damage;
-                document.getElementById('healthText').innerHTML = `${this.health}/${this.maxHealth}`;
+                this.applyRaceBonus();
+                this.updateStats();
+                this.updateUI();
             }
 
             applyRaceBonus() {
                 switch(this.race) {
                     case 'shadowMonarch':
-                        this.damage = Math.floor(this.damage * 1.5);
+                        this.baseDamage = Math.floor(this.baseDamage * 1.5);
                         break;
                     case 'quincy':
-                        this.damage = Math.floor(this.damage * 1.2);
+                        this.baseDamage = Math.floor(this.baseDamage * 1.2);
                         this.speed = Math.floor(this.speed * 1.3);
                         break;
                     case 'hollow':
@@ -546,8 +636,39 @@
                         this.health = this.maxHealth;
                         break;
                     case 'joestar':
-                        this.damage = Math.floor(this.damage * 1.3);
+                        this.baseDamage = Math.floor(this.baseDamage * 1.3);
                         break;
+                }
+            }
+
+            updateStats() {
+                // Calcular dano total (base + arma)
+                this.damage = this.baseDamage;
+                if (this.equipment.weapon && ITEMS[this.equipment.weapon]) {
+                    this.damage += ITEMS[this.equipment.weapon].damage || 0;
+                }
+                
+                // Calcular defesa total
+                this.defense = this.baseDefense;
+                if (this.equipment.armor && ITEMS[this.equipment.armor]) {
+                    this.defense += ITEMS[this.equipment.armor].defense || 0;
+                }
+                
+                this.updateUI();
+            }
+
+            updateUI() {
+                document.getElementById('damageText').textContent = this.damage;
+                document.getElementById('defenseText').textContent = this.defense;
+                document.getElementById('coinsText').textContent = this.coins;
+                document.getElementById('inventoryCoins').textContent = this.coins;
+                
+                if (this.equipment.weapon) {
+                    document.getElementById('equippedWeaponName').textContent = this.equipment.weapon;
+                    document.getElementById('lobbyPlayerWeapon').innerHTML = `⚔️ ${this.equipment.weapon}`;
+                }
+                if (this.equipment.armor) {
+                    document.getElementById('equippedArmorName').textContent = this.equipment.armor;
                 }
             }
 
@@ -570,7 +691,8 @@
             }
 
             takeDamage(amount) {
-                this.health -= amount;
+                const reducedDamage = Math.max(1, amount - this.defense);
+                this.health -= reducedDamage;
                 if (this.health < 0) this.health = 0;
                 
                 const percent = (this.health / this.maxHealth) * 100;
@@ -585,6 +707,95 @@
                 const percent = (this.health / this.maxHealth) * 100;
                 document.getElementById('playerHealthFill').style.width = `${percent}%`;
                 document.getElementById('healthText').innerHTML = `${Math.floor(this.health)}/${this.maxHealth}`;
+            }
+
+            addItem(itemName, quantity = 1) {
+                if (!this.inventory[itemName]) {
+                    this.inventory[itemName] = 0;
+                }
+                this.inventory[itemName] += quantity;
+                this.updateInventoryUI();
+            }
+
+            removeItem(itemName, quantity = 1) {
+                if (this.inventory[itemName] >= quantity) {
+                    this.inventory[itemName] -= quantity;
+                    if (this.inventory[itemName] <= 0) {
+                        delete this.inventory[itemName];
+                    }
+                    this.updateInventoryUI();
+                    return true;
+                }
+                return false;
+            }
+
+            equipItem(itemName) {
+                const item = ITEMS[itemName];
+                if (!item) return false;
+                
+                if (item.type === 'weapon' || item.type === 'armor') {
+                    // Desequipar item atual
+                    const currentEquip = this.equipment[item.type];
+                    if (currentEquip) {
+                        this.addItem(currentEquip);
+                    }
+                    
+                    // Equipar novo item
+                    this.equipment[item.type] = itemName;
+                    this.removeItem(itemName);
+                    this.updateStats();
+                    
+                    return true;
+                }
+                return false;
+            }
+
+            updateInventoryUI() {
+                const grid = document.getElementById('inventoryGrid');
+                grid.innerHTML = '';
+                
+                Object.entries(this.inventory).forEach(([item, quantity]) => {
+                    const itemData = ITEMS[item];
+                    if (!itemData) return;
+                    
+                    const slot = document.createElement('div');
+                    slot.className = 'inventory-slot';
+                    slot.innerHTML = `
+                        <div style="font-size: 32px; margin-bottom: 5px;">${itemData.emoji}</div>
+                        <div style="font-weight: bold;">${item}</div>
+                        <div style="color: ${itemData.rarity === 'lendário' ? '#ffd700' : '#8a2be2'};">
+                            ${itemData.type === 'weapon' ? `⚔️ +${itemData.damage}` : ''}
+                            ${itemData.type === 'armor' ? `🛡️ +${itemData.defense}` : ''}
+                            ${itemData.type === 'consumable' ? `❤️ +${itemData.heal}` : ''}
+                        </div>
+                        <div style="margin-top: 5px;">x${quantity}</div>
+                    `;
+                    
+                    slot.onclick = () => this.useItem(item);
+                    grid.appendChild(slot);
+                });
+            }
+
+            useItem(itemName) {
+                const item = ITEMS[itemName];
+                if (!item) return;
+                
+                if (item.type === 'consumable') {
+                    if (this.removeItem(itemName)) {
+                        this.heal(item.heal);
+                        this.showDropMessage(`🧪 Usou ${itemName}! +${item.heal} vida`);
+                    }
+                } else if (item.type === 'weapon' || item.type === 'armor') {
+                    if (this.equipItem(itemName)) {
+                        this.showDropMessage(`⚔️ Equipou ${itemName}!`);
+                    }
+                }
+            }
+
+            showDropMessage(msg) {
+                const dropMsg = document.getElementById('dropMessage');
+                dropMsg.textContent = msg;
+                dropMessageTimer = 120;
             }
 
             update() {
@@ -602,12 +813,7 @@
                     ctx.shadowColor = b.color;
                     ctx.beginPath();
                     ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-                    
-                    const gradient = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius);
-                    gradient.addColorStop(0, b.color);
-                    gradient.addColorStop(1, '#4a0080');
-                    
-                    ctx.fillStyle = gradient;
+                    ctx.fillStyle = b.color;
                     ctx.fill();
                 });
                 
@@ -663,8 +869,8 @@
                         dialog: {
                             welcome: 'Bem-vindo, aventureiro! Deseja entrar em uma dungeon?',
                             options: [
-                                { text: '⚔️ Dungeon da Caverna (Nível 1+)', action: 'dungeon', dungeon: 'caverna' },
-                                { text: '🌳 Floresta dos Espíritos (Nível 10+)', action: 'dungeon', dungeon: 'floresta' },
+                                { text: '⚔️ Caverna (Nível 1+)', action: 'dungeon', dungeon: 'caverna' },
+                                { text: '🌳 Floresta (Nível 10+)', action: 'dungeon', dungeon: 'floresta' },
                                 { text: '🔥 Covil do Dragão (Nível 25+)', action: 'dungeon', dungeon: 'covil' },
                                 { text: '❌ Cancelar', action: 'close' }
                             ]
@@ -672,30 +878,15 @@
                     },
                     {
                         id: 'blacksmith',
-                        name: '🔨 FERREIRO DAS SOMBRAS',
+                        name: '🔨 FERREIRO',
                         x: 800,
                         y: 500,
                         sprite: '⚒️',
                         color: '#ff8c00',
                         dialog: {
-                            welcome: 'Precisa de armas? Tenho itens lendários!',
+                            welcome: 'Quer vender seus itens?',
                             options: [
-                                { text: '🛠️ Melhorar Arma (500 moedas)', action: 'upgrade' },
-                                { text: '❌ Sair', action: 'close' }
-                            ]
-                        }
-                    },
-                    {
-                        id: 'merchant',
-                        name: '💰 MERCADOR VIAJANTE',
-                        x: 200,
-                        y: 600,
-                        sprite: '🧙',
-                        color: '#00ff00',
-                        dialog: {
-                            welcome: 'Mercadorias raras!',
-                            options: [
-                                { text: '🛒 Comprar Poção (50 moedas)', action: 'potion' },
+                                { text: '💰 Vender Itens', action: 'sell' },
                                 { text: '❌ Sair', action: 'close' }
                             ]
                         }
@@ -710,11 +901,10 @@
                 if (keys.a || keys.arrowleft) this.player.x -= this.player.speed;
                 if (keys.d || keys.arrowright) this.player.x += this.player.speed;
 
-                // Limites do mapa
                 this.player.x = Math.max(50, Math.min(1150, this.player.x));
                 this.player.y = Math.max(50, Math.min(750, this.player.y));
 
-                // Verificar proximidade com NPCs
+                // Proximidade com NPCs
                 this.nearbyNPC = null;
                 let minDistance = 100;
 
@@ -722,21 +912,19 @@
                     const dx = this.player.x - npc.x;
                     const dy = this.player.y - npc.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-
                     if (distance < minDistance) {
                         minDistance = distance;
                         this.nearbyNPC = npc;
                     }
                 });
 
-                // Atualizar UI
-                let raceName = this.player.race === 'shadowMonarch' ? 'Shadow Monarch' : 
-                              this.player.race === 'quincy' ? 'Quincy' : 
-                              this.player.race === 'hollow' ? 'Vasto Lorde' : 'Joestar';
-                document.getElementById('lobbyPlayerName').textContent = raceName;
+                // Update UI
+                document.getElementById('lobbyPlayerName').textContent = 
+                    this.player.race === 'shadowMonarch' ? 'Shadow Monarch' : 
+                    this.player.race === 'quincy' ? 'Quincy' : 
+                    this.player.race === 'hollow' ? 'Vasto Lorde' : 'Joestar';
                 document.getElementById('lobbyPlayerLevel').textContent = `Nível ${this.player.level}`;
                 document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
-                document.getElementById('coinsText').textContent = this.player.coins;
             }
 
             draw(ctx) {
@@ -747,7 +935,7 @@
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, 1200, 800);
 
-                // Grade decorativa
+                // Grade
                 ctx.strokeStyle = 'rgba(138, 43, 226, 0.2)';
                 ctx.lineWidth = 1;
                 for (let i = 0; i < 1200; i += 50) {
@@ -763,35 +951,20 @@
                     ctx.stroke();
                 }
 
-                // Árvores/Decorações
-                ctx.fillStyle = '#228B22';
-                for (let i = 0; i < 10; i++) {
-                    ctx.beginPath();
-                    ctx.arc(100 + i * 100, 700 + Math.sin(Date.now() * 0.001 + i) * 10, 5, 0, Math.PI * 2);
-                    ctx.fillStyle = '#32CD32';
-                    ctx.fill();
-                }
-
                 // NPCs
                 this.npcs.forEach(npc => {
-                    // Glow do NPC
                     ctx.shadowBlur = 20;
                     ctx.shadowColor = npc.color;
-                    
-                    // Sprite do NPC
                     ctx.font = '48px Arial';
                     ctx.fillStyle = npc.color;
                     ctx.fillText(npc.sprite, npc.x - 24, npc.y - 24);
                     
-                    // Nome do NPC
-                    ctx.shadowBlur = 10;
                     ctx.font = 'bold 16px "Courier New"';
                     ctx.fillStyle = 'white';
                     ctx.fillText(npc.name, npc.x - 60, npc.y - 50);
                     
                     ctx.shadowBlur = 0;
 
-                    // Indicador de interação
                     if (this.nearbyNPC === npc) {
                         ctx.strokeStyle = '#ffd700';
                         ctx.lineWidth = 3;
@@ -805,7 +978,6 @@
                     }
                 });
 
-                // Jogador
                 this.player.draw(ctx);
             }
 
@@ -836,32 +1008,32 @@
                     case 'dungeon':
                         startDungeon(option.dungeon);
                         break;
-                    case 'upgrade':
-                        if (this.player.coins >= 500) {
-                            this.player.coins -= 500;
-                            this.player.damage += 10;
-                            document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
-                            document.getElementById('coinsText').textContent = this.player.coins;
-                            document.getElementById('damageText').textContent = this.player.damage;
-                            alert('✅ Arma melhorada! Dano +10');
-                        } else {
-                            alert('❌ Moedas insuficientes!');
-                        }
-                        break;
-                    case 'potion':
-                        if (this.player.coins >= 50) {
-                            this.player.coins -= 50;
-                            this.player.heal(30);
-                            document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
-                            document.getElementById('coinsText').textContent = this.player.coins;
-                            alert('✅ Poção usada! Vida +30');
-                        } else {
-                            alert('❌ Moedas insuficientes!');
-                        }
+                    case 'sell':
+                        this.sellItems();
                         break;
                     case 'close':
                         break;
                 }
+            }
+
+            sellItems() {
+                let totalValue = 0;
+                const itemsToRemove = [];
+                
+                Object.entries(this.player.inventory).forEach(([item, quantity]) => {
+                    const itemData = ITEMS[item];
+                    if (itemData && itemData.type !== 'weapon' && itemData.type !== 'armor') {
+                        totalValue += itemData.value * quantity;
+                        itemsToRemove.push(item);
+                    }
+                });
+                
+                itemsToRemove.forEach(item => delete this.player.inventory[item]);
+                this.player.coins += totalValue;
+                this.player.updateInventoryUI();
+                this.player.updateUI();
+                
+                alert(`💰 Vendeu itens por ${totalValue} moedas!`);
             }
 
             closeDialog() {
@@ -879,6 +1051,8 @@
                 this.enemies = [];
                 this.boss = null;
                 this.state = 'active';
+                this.kills = 0;
+                this.killsNeeded = 5;
                 
                 this.initDungeon();
             }
@@ -898,7 +1072,7 @@
                 this.spawnEnemies();
                 this.updateUI();
                 
-                // Resetar vida do jogador
+                // Reset player health
                 this.player.health = this.player.maxHealth;
                 const percent = (this.player.health / this.player.maxHealth) * 100;
                 document.getElementById('playerHealthFill').style.width = `${percent}%`;
@@ -907,15 +1081,18 @@
 
             spawnEnemies() {
                 this.enemies = [];
-                const count = 3 + Math.floor(this.floor / 2);
+                this.kills = 0;
+                this.updateUI();
+                
+                const count = 5;
                 
                 for (let i = 0; i < count; i++) {
-                    const health = 50 + (this.floor * 20);
+                    const health = 50 + (this.floor * 10);
                     this.enemies.push({
                         type: 'Slime',
                         health: health,
                         maxHealth: health,
-                        damage: 5 + (this.floor * 2),
+                        damage: 5 + (this.floor * 1),
                         x: 200 + Math.random() * 800,
                         y: 100 + Math.random() * 400,
                         sprite: '🟢',
@@ -940,26 +1117,43 @@
                 document.getElementById('bossHealthFill').style.width = '100%';
             }
 
+            dropLoot(enemyType) {
+                const dropTable = DROP_TABLES[enemyType] || DROP_TABLES['Slime'];
+                
+                dropTable.forEach(drop => {
+                    if (Math.random() < drop.chance) {
+                        this.player.addItem(drop.item);
+                        this.player.showDropMessage(`🎁 Dropou: ${drop.item}!`);
+                    }
+                });
+                
+                // Moedas sempre dropam
+                const coins = 10 + Math.floor(Math.random() * 20);
+                this.player.coins += coins;
+                this.player.showDropMessage(`💰 +${coins} moedas!`);
+                this.player.updateUI();
+            }
+
             update() {
                 if (this.state !== 'active') return;
 
-                // Atualizar inimigos
+                // Update enemies
                 this.enemies = this.enemies.filter(enemy => {
                     if (enemy.health <= 0) {
-                        this.player.coins += 50;
-                        document.getElementById('coinsText').textContent = this.player.coins;
-                        document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
+                        this.dropLoot(enemy.type);
+                        this.kills++;
+                        this.updateUI();
                         return false;
                     }
                     
-                    // Movimento dos inimigos
+                    // Enemy movement
                     enemy.x += Math.sin(Date.now() * 0.001) * 2;
                     enemy.y += Math.cos(Date.now() * 0.002) * 2;
                     
                     enemy.x = Math.max(100, Math.min(1100, enemy.x));
                     enemy.y = Math.max(100, Math.min(600, enemy.y));
                     
-                    // Colisão com tiros do jogador
+                    // Bullet collision
                     this.player.bullets.forEach((bullet, bulletIndex) => {
                         const dx = bullet.x - enemy.x;
                         const dy = bullet.y - enemy.y;
@@ -971,21 +1165,23 @@
                         }
                     });
                     
-                    // Ataque do inimigo ao jogador
+                    // Attack player
                     if (Math.random() < 0.02) {
                         this.player.takeDamage(enemy.damage);
+                        if (this.player.health <= 0) {
+                            this.defeat();
+                        }
                     }
                     
                     return true;
                 });
 
-                // Atualizar boss
+                // Update boss
                 if (this.boss) {
                     if (this.boss.health <= 0) {
                         this.defeatBoss();
                     }
                     
-                    // Colisão com tiros do jogador
                     this.player.bullets.forEach((bullet, bulletIndex) => {
                         const dx = bullet.x - this.boss.x;
                         const dy = bullet.y - this.boss.y;
@@ -1000,15 +1196,17 @@
                         }
                     });
                     
-                    // Ataque do boss
                     if (Math.random() < 0.05) {
                         this.player.takeDamage(this.boss.damage);
+                        if (this.player.health <= 0) {
+                            this.defeat();
+                        }
                     }
                     
                     this.boss.x = 600 + Math.sin(Date.now() * 0.0005) * 100;
                 }
 
-                // Verificar progresso
+                // Check progress
                 if (this.enemies.length === 0 && !this.boss) {
                     if (this.floor === this.maxFloors) {
                         this.completeDungeon();
@@ -1023,11 +1221,11 @@
             }
 
             draw(ctx) {
-                // Fundo da dungeon
+                // Dungeon background
                 ctx.fillStyle = this.background;
                 ctx.fillRect(0, 0, 1200, 800);
 
-                // Efeitos de ambiente
+                // Ambient effects
                 ctx.fillStyle = 'rgba(255,255,255,0.05)';
                 for (let i = 0; i < 20; i++) {
                     ctx.beginPath();
@@ -1039,7 +1237,7 @@
                     ctx.fill();
                 }
 
-                // Inimigos
+                // Enemies
                 this.enemies.forEach(enemy => {
                     ctx.shadowBlur = 15;
                     ctx.shadowColor = enemy.color;
@@ -1047,7 +1245,6 @@
                     ctx.fillStyle = enemy.color;
                     ctx.fillText(enemy.sprite, enemy.x - 24, enemy.y - 24);
                     
-                    // Barra de vida do inimigo
                     ctx.shadowBlur = 0;
                     ctx.fillStyle = '#ff0000';
                     ctx.fillRect(enemy.x - 30, enemy.y - 50, 60, 5);
@@ -1063,37 +1260,31 @@
                     ctx.fillStyle = this.boss.color;
                     ctx.fillText(this.boss.sprite, this.boss.x - 32, this.boss.y - 32);
                     
-                    ctx.shadowBlur = 10;
                     ctx.font = 'bold 24px "Courier New"';
                     ctx.fillStyle = '#ff8c00';
                     ctx.fillText(this.boss.type, this.boss.x - 80, this.boss.y - 80);
                     ctx.shadowBlur = 0;
                 }
 
-                // Jogador
                 this.player.draw(ctx);
-                
-                // Andar atual
-                ctx.font = 'bold 24px "Courier New"';
-                ctx.fillStyle = 'white';
-                ctx.fillText(`Andar ${this.floor}/${this.maxFloors}`, 20, 50);
             }
 
             nextFloor() {
                 this.floor++;
                 this.spawnEnemies();
                 this.player.heal(Math.floor(this.player.maxHealth * 0.3));
+                this.player.showDropMessage(`✨ Avançou para o Andar ${this.floor}!`);
             }
 
             defeatBoss() {
+                this.dropLoot(this.boss.type);
+                
                 const reward = {
-                    coins: 500 * this.floor,
-                    items: ['Shadow Fragment']
+                    coins: 500 * this.floor
                 };
                 
                 this.player.coins += reward.coins;
-                document.getElementById('coinsText').textContent = this.player.coins;
-                document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
+                this.player.updateUI();
                 
                 this.showVictoryScreen(reward);
                 this.boss = null;
@@ -1107,18 +1298,21 @@
                 };
                 
                 this.player.coins += reward.coins;
-                document.getElementById('coinsText').textContent = this.player.coins;
-                document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
+                this.player.updateUI();
                 
                 this.showCompletionScreen(reward);
                 this.state = 'completed';
             }
 
+            defeat() {
+                alert('💀 Você foi derrotado! Voltando ao lobby...');
+                returnToLobby();
+            }
+
             updateUI() {
-                document.getElementById('dungeonName').textContent = 
-                    this.type.toUpperCase();
-                document.getElementById('dungeonFloor').textContent = 
-                    `Andar ${this.floor}/${this.maxFloors}`;
+                document.getElementById('dungeonName').textContent = this.type.toUpperCase();
+                document.getElementById('dungeonFloor').textContent = `Andar ${this.floor}/${this.maxFloors}`;
+                document.getElementById('dungeonKills').textContent = `💀 ${this.kills}/5`;
             }
 
             showVictoryScreen(reward) {
@@ -1128,7 +1322,6 @@
                     <h1 style="color: #ffd700;">BOSS DERROTADO!</h1>
                     <div class="rewards">
                         <p>💰 +${reward.coins} moedas</p>
-                        <p>🎁 Items: ${reward.items.join(', ')}</p>
                     </div>
                     <button class="menu-btn primary" onclick="continueDungeon()">PRÓXIMO ANDAR</button>
                 `;
@@ -1161,9 +1354,6 @@
             hideAllScreens();
             document.getElementById('lobbyScreen').classList.add('active');
             document.getElementById('ui').classList.remove('hidden');
-            
-            // Garantir que o canvas está sendo desenhado
-            canvas.style.background = '#1a2a3a';
         }
 
         function selectRace(race) {
@@ -1183,6 +1373,20 @@
             document.getElementById('ui').classList.add('hidden');
         }
 
+        function showInventory() {
+            if (!player) {
+                alert('❌ Inicie uma jornada primeiro!');
+                return;
+            }
+            
+            player.updateInventoryUI();
+            document.getElementById('inventoryPanel').classList.remove('hidden');
+        }
+
+        function closeInventory() {
+            document.getElementById('inventoryPanel').classList.add('hidden');
+        }
+
         function hideAllScreens() {
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
@@ -1190,10 +1394,13 @@
         }
 
         function startDungeon(type) {
+            if (!player) return;
+            
             currentScreen = 'dungeon';
             hideAllScreens();
             document.getElementById('dungeonScreen').classList.remove('hidden');
             document.getElementById('dungeonScreen').classList.add('active');
+            document.getElementById('dropMessage').textContent = '';
             
             dungeon = new Dungeon(type, player);
         }
@@ -1233,6 +1440,10 @@
                     }
                 }
                 
+                if (e.key.toLowerCase() === 'i') {
+                    showInventory();
+                }
+                
                 if (e.key.toLowerCase() === 'e' && currentScreen === 'lobby' && lobby?.nearbyNPC && !lobby?.activeDialog) {
                     lobby.openDialog(lobby.nearbyNPC);
                 }
@@ -1243,7 +1454,7 @@
             });
             
             canvas.addEventListener('click', (e) => {
-                if (currentScreen === 'dungeon' && dungeon?.state === 'active') {
+                if (currentScreen === 'dungeon' && dungeon?.state === 'active' && player) {
                     const rect = canvas.getBoundingClientRect();
                     const scaleX = canvas.width / rect.width;
                     const scaleY = canvas.height / rect.height;
@@ -1259,25 +1470,31 @@
             canvas.addEventListener('mouseup', () => isMouseDown = false);
             canvas.addEventListener('mouseleave', () => isMouseDown = false);
             
-            // Disparo automático
+            // Auto shoot
             setInterval(() => {
                 if (isMouseDown && currentScreen === 'dungeon' && dungeon?.state === 'active' && player) {
                     player.shoot(player.x + 10, player.y - 50);
                 }
-            }, 200);
+                
+                // Update drop message timer
+                if (dropMessageTimer > 0) {
+                    dropMessageTimer--;
+                    if (dropMessageTimer <= 0) {
+                        document.getElementById('dropMessage').textContent = '';
+                    }
+                }
+            }, 150);
             
-            // Loop do jogo
+            // Game loop
             function gameLoop() {
-                // Limpar canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
-                // Atualizar e desenhar baseado na tela atual
                 if (currentScreen === 'lobby' && lobby) {
                     lobby.update();
                     lobby.draw(ctx);
                 }
                 
-                if (currentScreen === 'dungeon' && dungeon) {
+                if (currentScreen === 'dungeon' && dungeon && player) {
                     player.update();
                     dungeon.update();
                     dungeon.draw(ctx);
