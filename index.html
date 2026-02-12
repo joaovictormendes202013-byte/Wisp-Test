@@ -480,6 +480,7 @@
                     <span id="lobbyPlayerLevel">Nível 1</span>
                     <span id="lobbyPlayerCoins">💰 500</span>
                     <span id="lobbyPlayerWeapon">⚔️ Espada Inicial</span>
+                    <span id="lobbyPlayerArmor">🛡️ Nenhuma</span>
                 </div>
                 
                 <div class="npc-hint">
@@ -535,6 +536,9 @@
                             <div id="equippedArmorName">Nenhuma</div>
                         </div>
                     </div>
+                    <div style="margin-top: 20px; color: #ffd700;">
+                        <div>❤️ Vida: <span id="equippedHealthBonus">0</span></div>
+                    </div>
                 </div>
                 
                 <!-- Itens do Inventário -->
@@ -562,6 +566,7 @@
             <div style="margin-top: 10px; color: white;">💰 <span id="coinsText">500</span></div>
             <div style="color: white;">⚔️ Dano: <span id="damageText">20</span></div>
             <div style="color: white;">🛡️ Defesa: <span id="defenseText">0</span></div>
+            <div style="color: white;">❤️ Vida Máx: <span id="maxHealthText">100</span></div>
         </div>
     </div>
 
@@ -575,11 +580,11 @@
             'Excalibur': { type: 'weapon', damage: 100, value: 1000, emoji: '⚔️✨', rarity: 'lendário' },
             'Espada do Rei': { type: 'weapon', damage: 75, value: 500, emoji: '👑', rarity: 'épico' },
             
-            // Armaduras
-            'Armadura de Couro': { type: 'armor', defense: 10, value: 100, emoji: '🛡️', rarity: 'comum' },
-            'Armadura de Ferro': { type: 'armor', defense: 20, value: 250, emoji: '🛡️', rarity: 'incomum' },
-            'Armadura das Sombras': { type: 'armor', defense: 35, value: 500, emoji: '🛡️🌑', rarity: 'raro' },
-            'Armadura Sagrada': { type: 'armor', defense: 50, value: 800, emoji: '🛡️✨', rarity: 'lendário' },
+            // Armaduras (agora aumentam VIDA também)
+            'Armadura de Couro': { type: 'armor', defense: 10, healthBonus: 20, value: 100, emoji: '🛡️', rarity: 'comum' },
+            'Armadura de Ferro': { type: 'armor', defense: 20, healthBonus: 50, value: 250, emoji: '🛡️', rarity: 'incomum' },
+            'Armadura das Sombras': { type: 'armor', defense: 35, healthBonus: 100, value: 500, emoji: '🛡️🌑', rarity: 'raro' },
+            'Armadura Sagrada': { type: 'armor', defense: 50, healthBonus: 200, value: 800, emoji: '🛡️✨', rarity: 'lendário' },
             
             // Poções
             'Poção de Vida': { type: 'consumable', heal: 50, value: 50, emoji: '🧪', rarity: 'comum' },
@@ -599,11 +604,13 @@
             ],
             'Rei Slime': [
                 { item: 'Espada Longa', chance: 0.5 },
+                { item: 'Armadura de Ferro', chance: 0.4 },
                 { item: 'Poção de Vida Grande', chance: 0.4 },
                 { item: 'Essência do Abismo', chance: 0.2 }
             ],
             'Espírito da Floresta': [
                 { item: 'Armadura de Ferro', chance: 0.5 },
+                { item: 'Espada Longa', chance: 0.4 },
                 { item: 'Poção de Vida Grande', chance: 0.3 },
                 { item: 'Fragmento Sombrio', chance: 0.3 }
             ],
@@ -633,8 +640,10 @@
                 this.level = 1;
                 this.exp = 0;
                 this.expToNext = 100;
-                this.health = 100;
-                this.maxHealth = 100;
+                this.baseHealth = 100;
+                this.healthBonus = 0;
+                this.health = this.baseHealth;
+                this.maxHealth = this.baseHealth;
                 this.baseDamage = 20;
                 this.baseDefense = 0;
                 this.speed = 7;
@@ -664,13 +673,14 @@
                         this.speed = Math.floor(this.speed * 1.3);
                         break;
                     case 'hollow':
-                        this.maxHealth = Math.floor(this.maxHealth * 1.5);
-                        this.health = this.maxHealth;
+                        this.baseHealth = Math.floor(this.baseHealth * 1.5);
                         break;
                     case 'joestar':
                         this.baseDamage = Math.floor(this.baseDamage * 1.3);
                         break;
                 }
+                this.maxHealth = this.baseHealth + this.healthBonus;
+                this.health = this.maxHealth;
             }
 
             updateStats() {
@@ -680,10 +690,27 @@
                     this.damage += ITEMS[this.equipment.weapon].damage || 0;
                 }
                 
-                // Calcular defesa total
+                // Calcular defesa total e bônus de vida
                 this.defense = this.baseDefense;
+                this.healthBonus = 0;
+                
                 if (this.equipment.armor && ITEMS[this.equipment.armor]) {
                     this.defense += ITEMS[this.equipment.armor].defense || 0;
+                    this.healthBonus += ITEMS[this.equipment.armor].healthBonus || 0;
+                }
+                
+                // Atualizar vida máxima
+                const oldMaxHealth = this.maxHealth;
+                this.maxHealth = this.baseHealth + this.healthBonus;
+                
+                // Ajustar vida atual proporcionalmente
+                if (this.health > 0) {
+                    this.health = Math.min(this.health, this.maxHealth);
+                    if (oldMaxHealth < this.maxHealth) {
+                        this.health += (this.maxHealth - oldMaxHealth);
+                    }
+                } else {
+                    this.health = this.maxHealth;
                 }
                 
                 this.updateUI();
@@ -692,6 +719,7 @@
             updateUI() {
                 document.getElementById('damageText').textContent = this.damage;
                 document.getElementById('defenseText').textContent = this.defense;
+                document.getElementById('maxHealthText').textContent = this.maxHealth;
                 document.getElementById('coinsText').textContent = this.coins;
                 document.getElementById('inventoryCoins').textContent = this.coins;
                 
@@ -701,7 +729,17 @@
                 }
                 if (this.equipment.armor) {
                     document.getElementById('equippedArmorName').textContent = this.equipment.armor;
+                    document.getElementById('lobbyPlayerArmor').innerHTML = `🛡️ ${this.equipment.armor}`;
+                    document.getElementById('equippedHealthBonus').textContent = `+${this.healthBonus}`;
+                } else {
+                    document.getElementById('equippedArmorName').textContent = 'Nenhuma';
+                    document.getElementById('lobbyPlayerArmor').innerHTML = `🛡️ Nenhuma`;
+                    document.getElementById('equippedHealthBonus').textContent = '0';
                 }
+                
+                const percent = (this.health / this.maxHealth) * 100;
+                document.getElementById('playerHealthFill').style.width = `${percent}%`;
+                document.getElementById('healthText').innerHTML = `${Math.floor(this.health)}/${this.maxHealth}`;
             }
 
             shoot(targetX, targetY) {
@@ -723,7 +761,7 @@
             }
 
             takeDamage(amount) {
-                const reducedDamage = Math.max(1, amount - this.defense);
+                const reducedDamage = Math.max(1, amount - Math.floor(this.defense / 2));
                 this.health -= reducedDamage;
                 if (this.health < 0) this.health = 0;
                 
@@ -784,6 +822,8 @@
 
             updateInventoryUI() {
                 const grid = document.getElementById('inventoryGrid');
+                if (!grid) return;
+                
                 grid.innerHTML = '';
                 
                 Object.entries(this.inventory).forEach(([item, quantity]) => {
@@ -797,7 +837,7 @@
                         <div style="font-weight: bold; color: white;">${item}</div>
                         <div style="color: ${itemData.rarity === 'lendário' ? '#ffd700' : '#8a2be2'};">
                             ${itemData.type === 'weapon' ? `⚔️ +${itemData.damage}` : ''}
-                            ${itemData.type === 'armor' ? `🛡️ +${itemData.defense}` : ''}
+                            ${itemData.type === 'armor' ? `🛡️ +${itemData.defense} def | ❤️ +${itemData.healthBonus} hp` : ''}
                             ${itemData.type === 'consumable' ? `❤️ +${itemData.heal}` : ''}
                         </div>
                         <div style="margin-top: 5px; color: white;">x${quantity}</div>
@@ -962,15 +1002,15 @@
             }
 
             draw(ctx) {
-                // Fundo gradiente
+                // Fundo gradiente mais claro para o lobby
                 const gradient = ctx.createLinearGradient(0, 0, 0, 800);
-                gradient.addColorStop(0, '#1a2a3a');
-                gradient.addColorStop(1, '#0a1a2a');
+                gradient.addColorStop(0, '#3a4a6a');
+                gradient.addColorStop(1, '#2a3a5a');
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, 1200, 800);
 
-                // Grade
-                ctx.strokeStyle = 'rgba(138, 43, 226, 0.2)';
+                // Grade mais suave
+                ctx.strokeStyle = 'rgba(255, 215, 0, 0.15)';
                 ctx.lineWidth = 1;
                 for (let i = 0; i < 1200; i += 50) {
                     ctx.beginPath();
@@ -985,17 +1025,26 @@
                     ctx.stroke();
                 }
 
+                // Decorações
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.1)';
+                for (let i = 0; i < 20; i++) {
+                    ctx.beginPath();
+                    ctx.arc(100 + i * 100, 700, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
                 // NPCs
                 this.npcs.forEach(npc => {
-                    ctx.shadowBlur = 20;
+                    ctx.shadowBlur = 25;
                     ctx.shadowColor = npc.color;
-                    ctx.font = '48px Arial';
+                    ctx.font = '56px Arial';
                     ctx.fillStyle = npc.color;
-                    ctx.fillText(npc.sprite, npc.x - 24, npc.y - 24);
+                    ctx.fillText(npc.sprite, npc.x - 28, npc.y - 28);
                     
-                    ctx.font = 'bold 16px "Courier New"';
+                    ctx.shadowBlur = 10;
+                    ctx.font = 'bold 18px "Courier New"';
                     ctx.fillStyle = 'white';
-                    ctx.fillText(npc.name, npc.x - 60, npc.y - 50);
+                    ctx.fillText(npc.name, npc.x - 70, npc.y - 60);
                     
                     ctx.shadowBlur = 0;
 
@@ -1003,12 +1052,12 @@
                         ctx.strokeStyle = '#ffd700';
                         ctx.lineWidth = 3;
                         ctx.beginPath();
-                        ctx.arc(npc.x, npc.y, 50, 0, Math.PI * 2);
+                        ctx.arc(npc.x, npc.y, 60, 0, Math.PI * 2);
                         ctx.stroke();
                         
                         ctx.font = '20px Arial';
                         ctx.fillStyle = '#ffd700';
-                        ctx.fillText('Pressione E', npc.x - 70, npc.y - 90);
+                        ctx.fillText('Pressione E', npc.x - 70, npc.y - 100);
                     }
                 });
 
@@ -1056,7 +1105,7 @@
                 
                 Object.entries(this.player.inventory).forEach(([item, quantity]) => {
                     const itemData = ITEMS[item];
-                    if (itemData && itemData.type !== 'weapon' && itemData.type !== 'armor') {
+                    if (itemData && (itemData.type === 'material' || itemData.type === 'consumable')) {
                         totalValue += itemData.value * quantity;
                         itemsToRemove.push(item);
                     }
@@ -1067,7 +1116,7 @@
                 this.player.updateInventoryUI();
                 this.player.updateUI();
                 
-                alert(`💰 Vendeu itens por ${totalValue} moedas!`);
+                this.player.showDropMessage(`💰 Vendeu itens por ${totalValue} moedas!`);
             }
 
             closeDialog() {
@@ -1083,10 +1132,11 @@
                 this.player = player;
                 this.floor = 1;
                 this.enemies = [];
+                this.enemyBullets = [];
                 this.boss = null;
                 this.state = 'active';
                 this.kills = 0;
-                this.killsNeeded = 5;
+                this.killsPerFloor = 5;
                 
                 this.initDungeon();
             }
@@ -1108,20 +1158,19 @@
                 
                 // Reset player health
                 this.player.health = this.player.maxHealth;
-                const percent = (this.player.health / this.player.maxHealth) * 100;
-                document.getElementById('playerHealthFill').style.width = `${percent}%`;
-                document.getElementById('healthText').innerHTML = `${Math.floor(this.player.health)}/${this.player.maxHealth}`;
+                this.player.updateUI();
             }
 
             spawnEnemies() {
                 this.enemies = [];
+                this.enemyBullets = [];
                 this.kills = 0;
                 this.updateUI();
                 
-                const count = 5;
+                const count = 5 + this.floor;
                 
                 for (let i = 0; i < count; i++) {
-                    const health = 50 + (this.floor * 10);
+                    const health = 40 + (this.floor * 10);
                     this.enemies.push({
                         type: 'Slime',
                         health: health,
@@ -1129,22 +1178,32 @@
                         damage: 5 + (this.floor * 1),
                         x: 200 + Math.random() * 800,
                         y: 100 + Math.random() * 400,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                        attackCooldown: 0,
                         sprite: '🟢',
-                        color: '#00ff00'
+                        color: '#00ff00',
+                        bulletColor: '#ff0000'
                     });
                 }
             }
 
             spawnBoss() {
+                this.enemies = [];
                 this.boss = {
                     type: this.bossName,
-                    health: 500 + (this.floor * 50),
-                    maxHealth: 500 + (this.floor * 50),
-                    damage: 15 + (this.floor * 2),
+                    health: 500 + (this.floor * 100),
+                    maxHealth: 500 + (this.floor * 100),
+                    damage: 15 + (this.floor * 3),
                     x: 600,
                     y: 150,
-                    sprite: '👑',
-                    color: '#ff4500'
+                    vx: 2,
+                    vy: 2,
+                    attackCooldown: 0,
+                    sprite: this.bossName === 'Dragão Ancião' ? '🐉' : 
+                            this.bossName === 'Espírito da Floresta' ? '🌳' : '👑',
+                    color: '#ff4500',
+                    bulletColor: '#ff8c00'
                 };
                 
                 document.getElementById('bossHealthContainer').classList.remove('hidden');
@@ -1162,7 +1221,7 @@
                 });
                 
                 // Moedas sempre dropam
-                const coins = 10 + Math.floor(Math.random() * 20);
+                const coins = 10 + Math.floor(Math.random() * 30);
                 this.player.coins += coins;
                 this.player.showDropMessage(`💰 +${coins} moedas!`);
                 this.player.updateUI();
@@ -1181,11 +1240,33 @@
                     }
                     
                     // Enemy movement
-                    enemy.x += Math.sin(Date.now() * 0.001) * 2;
-                    enemy.y += Math.cos(Date.now() * 0.002) * 2;
+                    enemy.x += enemy.vx;
+                    enemy.y += enemy.vy;
                     
-                    enemy.x = Math.max(100, Math.min(1100, enemy.x));
-                    enemy.y = Math.max(100, Math.min(600, enemy.y));
+                    if (enemy.x < 100 || enemy.x > 1100) enemy.vx *= -1;
+                    if (enemy.y < 100 || enemy.y > 600) enemy.vy *= -1;
+                    
+                    // Attack player with projectiles
+                    enemy.attackCooldown--;
+                    if (enemy.attackCooldown <= 0) {
+                        enemy.attackCooldown = 30 + Math.floor(Math.random() * 30);
+                        
+                        const dx = this.player.x - enemy.x;
+                        const dy = this.player.y - enemy.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 400) {
+                            this.enemyBullets.push({
+                                x: enemy.x,
+                                y: enemy.y,
+                                vx: (dx / distance) * 5,
+                                vy: (dy / distance) * 5,
+                                damage: enemy.damage,
+                                color: enemy.bulletColor || '#ff0000',
+                                radius: 5
+                            });
+                        }
+                    }
                     
                     // Bullet collision
                     this.player.bullets.forEach((bullet, bulletIndex) => {
@@ -1199,15 +1280,28 @@
                         }
                     });
                     
-                    // Attack player
-                    if (Math.random() < 0.02) {
-                        this.player.takeDamage(enemy.damage);
+                    return true;
+                });
+
+                // Update enemy bullets
+                this.enemyBullets = this.enemyBullets.filter(bullet => {
+                    bullet.x += bullet.vx;
+                    bullet.y += bullet.vy;
+                    
+                    // Check collision with player
+                    const dx = bullet.x - this.player.x;
+                    const dy = bullet.y - this.player.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 25) {
+                        this.player.takeDamage(bullet.damage);
                         if (this.player.health <= 0) {
                             this.defeat();
                         }
+                        return false;
                     }
                     
-                    return true;
+                    return bullet.x > 0 && bullet.x < 1200 && bullet.y > 0 && bullet.y < 800;
                 });
 
                 // Update boss
@@ -1216,6 +1310,33 @@
                         this.defeatBoss();
                     }
                     
+                    // Boss movement
+                    this.boss.x += this.boss.vx;
+                    this.boss.y += this.boss.vy;
+                    
+                    if (this.boss.x < 200 || this.boss.x > 1000) this.boss.vx *= -1;
+                    if (this.boss.y < 100 || this.boss.y > 500) this.boss.vy *= -1;
+                    
+                    // Boss attack
+                    this.boss.attackCooldown--;
+                    if (this.boss.attackCooldown <= 0) {
+                        this.boss.attackCooldown = 20;
+                        
+                        for (let i = 0; i < 3; i++) {
+                            const angle = (Math.PI * 2 / 3) * i + Date.now() * 0.005;
+                            this.enemyBullets.push({
+                                x: this.boss.x,
+                                y: this.boss.y,
+                                vx: Math.cos(angle) * 6,
+                                vy: Math.sin(angle) * 6,
+                                damage: this.boss.damage,
+                                color: '#ff4500',
+                                radius: 8
+                            });
+                        }
+                    }
+                    
+                    // Player bullets hit boss
                     this.player.bullets.forEach((bullet, bulletIndex) => {
                         const dx = bullet.x - this.boss.x;
                         const dy = bullet.y - this.boss.y;
@@ -1226,18 +1347,9 @@
                             this.player.bullets.splice(bulletIndex, 1);
                             
                             const percent = (this.boss.health / this.boss.maxHealth) * 100;
-                            document.getElementById('bossHealthFill').style.width = `${percent}%`;
+                            document.getElementById('bossHealthFill').style.width = `${Math.max(0, percent)}%`;
                         }
                     });
-                    
-                    if (Math.random() < 0.05) {
-                        this.player.takeDamage(this.boss.damage);
-                        if (this.player.health <= 0) {
-                            this.defeat();
-                        }
-                    }
-                    
-                    this.boss.x = 600 + Math.sin(Date.now() * 0.0005) * 100;
                 }
 
                 // Check progress
@@ -1260,8 +1372,8 @@
                 ctx.fillRect(0, 0, 1200, 800);
 
                 // Ambient effects
-                ctx.fillStyle = 'rgba(255,255,255,0.05)';
-                for (let i = 0; i < 20; i++) {
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                for (let i = 0; i < 30; i++) {
                     ctx.beginPath();
                     ctx.arc(
                         100 + (i * 100) + Math.sin(Date.now() * 0.001 + i) * 20,
@@ -1270,6 +1382,16 @@
                     );
                     ctx.fill();
                 }
+
+                // Enemy bullets
+                this.enemyBullets.forEach(b => {
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = b.color;
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = b.color;
+                    ctx.fill();
+                });
 
                 // Enemies
                 this.enemies.forEach(enemy => {
@@ -1294,10 +1416,16 @@
                     ctx.fillStyle = this.boss.color;
                     ctx.fillText(this.boss.sprite, this.boss.x - 32, this.boss.y - 32);
                     
-                    ctx.font = 'bold 24px "Courier New"';
+                    ctx.shadowBlur = 10;
+                    ctx.font = 'bold 20px "Courier New"';
                     ctx.fillStyle = '#ff8c00';
-                    ctx.fillText(this.boss.type, this.boss.x - 80, this.boss.y - 80);
+                    ctx.fillText(this.boss.type, this.boss.x - 70, this.boss.y - 80);
+                    
                     ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillRect(this.boss.x - 80, this.boss.y - 100, 160, 10);
+                    ctx.fillStyle = '#00ff00';
+                    ctx.fillRect(this.boss.x - 80, this.boss.y - 100, 160 * (this.boss.health / this.boss.maxHealth), 10);
                 }
 
                 this.player.draw(ctx);
@@ -1308,6 +1436,9 @@
                 this.spawnEnemies();
                 this.player.heal(Math.floor(this.player.maxHealth * 0.3));
                 this.player.showDropMessage(`✨ Avançou para o Andar ${this.floor}!`);
+                
+                // Remove victory screen if exists
+                document.querySelector('.victory-screen')?.remove();
             }
 
             defeatBoss() {
@@ -1327,8 +1458,8 @@
 
             completeDungeon() {
                 const reward = {
-                    coins: 2000 * this.maxFloors,
-                    exp: 1000 * this.maxFloors
+                    coins: 1000 * this.maxFloors,
+                    exp: 500 * this.maxFloors
                 };
                 
                 this.player.coins += reward.coins;
@@ -1339,17 +1470,22 @@
             }
 
             defeat() {
-                alert('💀 Você foi derrotado! Voltando ao lobby...');
-                returnToLobby();
+                this.player.showDropMessage('💀 Você foi derrotado! Voltando ao lobby...');
+                setTimeout(() => {
+                    returnToLobby();
+                }, 2000);
             }
 
             updateUI() {
                 document.getElementById('dungeonName').textContent = this.type.toUpperCase();
                 document.getElementById('dungeonFloor').textContent = `Andar ${this.floor}/${this.maxFloors}`;
-                document.getElementById('dungeonKills').textContent = `💀 ${this.kills}/5`;
+                document.getElementById('dungeonKills').textContent = `💀 ${this.kills}/${this.killsPerFloor}`;
             }
 
             showVictoryScreen(reward) {
+                const existing = document.querySelector('.victory-screen');
+                if (existing) existing.remove();
+                
                 const victoryEl = document.createElement('div');
                 victoryEl.className = 'victory-screen';
                 victoryEl.innerHTML = `
@@ -1363,6 +1499,9 @@
             }
 
             showCompletionScreen(reward) {
+                const existing = document.querySelector('.completion-screen');
+                if (existing) existing.remove();
+                
                 const completionEl = document.createElement('div');
                 completionEl.className = 'completion-screen';
                 completionEl.innerHTML = `
@@ -1392,6 +1531,8 @@
             lobbyScreen.style.display = 'flex';
             
             document.getElementById('ui').classList.remove('hidden');
+            player.updateUI();
+            player.updateInventoryUI();
         }
 
         function selectRace(race) {
@@ -1453,13 +1594,16 @@
             
             document.getElementById('dropMessage').textContent = '';
             document.getElementById('ui').classList.remove('hidden');
+            document.getElementById('bossHealthContainer').classList.add('hidden');
             
             dungeon = new Dungeon(type, player);
         }
 
         function continueDungeon() {
-            dungeon.nextFloor();
-            document.querySelector('.victory-screen')?.remove();
+            if (dungeon) {
+                dungeon.nextFloor();
+                document.querySelector('.victory-screen')?.remove();
+            }
         }
 
         function returnToLobby() {
