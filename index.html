@@ -38,6 +38,7 @@
             width: 100%;
             height: 100%;
             display: block;
+            z-index: 1;
         }
 
         .screen {
@@ -51,15 +52,37 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            z-index: 100;
+            z-index: 20;
         }
 
         .screen.active {
             display: flex;
         }
 
+        #dungeonScreen {
+            background: transparent !important;
+            pointer-events: none;
+        }
+
+        #dungeonScreen.active {
+            display: flex;
+        }
+
+        #dungeonScreen .dungeon-ui,
+        #dungeonScreen .boss-health,
+        #dungeonScreen .victory-screen,
+        #dungeonScreen .completion-screen {
+            pointer-events: auto;
+        }
+
         .hidden {
             display: none !important;
+        }
+
+        /* UI do jogo - fica entre canvas e telas */
+        #ui, .lobby-ui, .dungeon-ui, .inventory-panel, .npc-dialog {
+            z-index: 10;
+            position: absolute;
         }
 
         /* Tela de Título */
@@ -151,7 +174,7 @@
             bottom: 30px;
             left: 30px;
             right: 30px;
-            z-index: 200;
+            z-index: 10;
         }
 
         .player-lobby-info {
@@ -197,7 +220,7 @@
             border: 3px solid #ffd700;
             border-radius: 20px;
             padding: 30px;
-            z-index: 300;
+            z-index: 15;
         }
 
         .dialog-npc-name {
@@ -241,7 +264,7 @@
             top: 30px;
             left: 30px;
             right: 30px;
-            z-index: 200;
+            z-index: 10;
         }
 
         .dungeon-info {
@@ -305,7 +328,7 @@
             border: 3px solid #ffd700;
             border-radius: 20px;
             padding: 30px;
-            z-index: 400;
+            z-index: 30;
             color: white;
         }
 
@@ -348,6 +371,7 @@
             right: 30px;
             color: rgba(255,255,255,0.5);
             font-size: 14px;
+            z-index: 10;
         }
 
         .back-btn {
@@ -376,7 +400,7 @@
             padding: 40px;
             text-align: center;
             color: white;
-            z-index: 400;
+            z-index: 40;
             min-width: 500px;
         }
 
@@ -386,11 +410,19 @@
             left: 20px;
             color: white;
             font-size: 18px;
-            z-index: 150;
+            z-index: 10;
             background: rgba(0,0,0,0.7);
             padding: 20px;
             border-radius: 15px;
             border: 1px solid #ffd700;
+        }
+
+        #dropMessage {
+            color: #ffd700;
+            margin-top: 10px;
+            font-size: 18px;
+            z-index: 10;
+            position: relative;
         }
     </style>
 </head>
@@ -401,7 +433,7 @@
         <!-- Tela de Título -->
         <div id="titleScreen" class="screen active">
             <div class="title-logo">SHADOW BULLET HELL</div>
-            <div class="title-sub">RPG × Bullet Hell × DROPS</div>
+            <div class="title-sub" style="color: white; margin-bottom: 40px;">RPG × Bullet Hell × DROPS</div>
             
             <div class="menu-buttons">
                 <button class="menu-btn primary" onclick="startGame()">▶ INICIAR JORNADA</button>
@@ -419,22 +451,22 @@
                 <div class="race-card" onclick="selectRace('shadowMonarch')">
                     <div class="race-icon">👑</div>
                     <div class="race-name">Shadow Monarch</div>
-                    <div class="race-desc">Dano +50% | Drop +20%</div>
+                    <div style="color: white;">Dano +50% | Drop +20%</div>
                 </div>
                 <div class="race-card" onclick="selectRace('quincy')">
                     <div class="race-icon">🏹</div>
                     <div class="race-name">Quincy</div>
-                    <div class="race-desc">Velocidade +30% | Crítico +15%</div>
+                    <div style="color: white;">Velocidade +30% | Crítico +15%</div>
                 </div>
                 <div class="race-card" onclick="selectRace('hollow')">
                     <div class="race-icon">👹</div>
                     <div class="race-name">Vasto Lorde</div>
-                    <div class="race-desc">Vida +50% | Regeneração</div>
+                    <div style="color: white;">Vida +50% | Regeneração</div>
                 </div>
                 <div class="race-card" onclick="selectRace('joestar')">
                     <div class="race-icon">🌟</div>
                     <div class="race-name">Joestar</div>
-                    <div class="race-desc">Especial +30% | Sorte +20%</div>
+                    <div style="color: white;">Especial +30% | Sorte +20%</div>
                 </div>
             </div>
             <button class="back-btn" onclick="backToTitle()">VOLTAR</button>
@@ -475,6 +507,7 @@
                 </div>
                 
                 <div id="bossHealthContainer" class="boss-health hidden">
+                    <div style="color: white; margin-bottom: 10px;">🔥 DRAGÃO ANCIÃO</div>
                     <div class="boss-health-bar">
                         <div id="bossHealthFill"></div>
                     </div>
@@ -512,7 +545,7 @@
             </div>
             
             <div style="display: flex; justify-content: space-between; margin-top: 30px;">
-                <span>💰 Moedas: <span id="inventoryCoins">500</span></span>
+                <span style="color: white;">💰 Moedas: <span id="inventoryCoins">500</span></span>
                 <button class="menu-btn" onclick="closeInventory()" style="padding: 10px 20px; font-size: 16px;">FECHAR</button>
             </div>
         </div>
@@ -520,15 +553,15 @@
         <!-- UI Principal -->
         <div id="ui" class="hidden">
             <div style="display: flex; align-items: center; gap: 20px;">
-                <span>❤️</span>
+                <span style="color: white;">❤️</span>
                 <div class="health-bar">
                     <div id="playerHealthFill"></div>
                 </div>
-                <span id="healthText">100/100</span>
+                <span id="healthText" style="color: white;">100/100</span>
             </div>
-            <div style="margin-top: 10px;">💰 <span id="coinsText">500</span></div>
-            <div>⚔️ Dano: <span id="damageText">20</span></div>
-            <div>🛡️ Defesa: <span id="defenseText">0</span></div>
+            <div style="margin-top: 10px; color: white;">💰 <span id="coinsText">500</span></div>
+            <div style="color: white;">⚔️ Dano: <span id="damageText">20</span></div>
+            <div style="color: white;">🛡️ Defesa: <span id="defenseText">0</span></div>
         </div>
     </div>
 
@@ -619,7 +652,6 @@
                 
                 this.applyRaceBonus();
                 this.updateStats();
-                this.updateUI();
             }
 
             applyRaceBonus() {
@@ -762,13 +794,13 @@
                     slot.className = 'inventory-slot';
                     slot.innerHTML = `
                         <div style="font-size: 32px; margin-bottom: 5px;">${itemData.emoji}</div>
-                        <div style="font-weight: bold;">${item}</div>
+                        <div style="font-weight: bold; color: white;">${item}</div>
                         <div style="color: ${itemData.rarity === 'lendário' ? '#ffd700' : '#8a2be2'};">
                             ${itemData.type === 'weapon' ? `⚔️ +${itemData.damage}` : ''}
                             ${itemData.type === 'armor' ? `🛡️ +${itemData.defense}` : ''}
                             ${itemData.type === 'consumable' ? `❤️ +${itemData.heal}` : ''}
                         </div>
-                        <div style="margin-top: 5px;">x${quantity}</div>
+                        <div style="margin-top: 5px; color: white;">x${quantity}</div>
                     `;
                     
                     slot.onclick = () => this.useItem(item);
@@ -794,8 +826,10 @@
 
             showDropMessage(msg) {
                 const dropMsg = document.getElementById('dropMessage');
-                dropMsg.textContent = msg;
-                dropMessageTimer = 120;
+                if (dropMsg) {
+                    dropMsg.textContent = msg;
+                    dropMessageTimer = 120;
+                }
             }
 
             update() {
@@ -1320,7 +1354,7 @@
                 victoryEl.className = 'victory-screen';
                 victoryEl.innerHTML = `
                     <h1 style="color: #ffd700;">BOSS DERROTADO!</h1>
-                    <div class="rewards">
+                    <div style="margin: 30px 0; font-size: 24px; color: white;">
                         <p>💰 +${reward.coins} moedas</p>
                     </div>
                     <button class="menu-btn primary" onclick="continueDungeon()">PRÓXIMO ANDAR</button>
@@ -1333,7 +1367,7 @@
                 completionEl.className = 'completion-screen';
                 completionEl.innerHTML = `
                     <h1 style="color: #ffd700;">DUNGEON COMPLETA! 🏆</h1>
-                    <div class="rewards">
+                    <div style="margin: 30px 0; font-size: 24px; color: white;">
                         <p>💰 +${reward.coins} moedas</p>
                         <p>✨ +${reward.exp} XP</p>
                     </div>
@@ -1352,7 +1386,11 @@
             
             currentScreen = 'lobby';
             hideAllScreens();
-            document.getElementById('lobbyScreen').classList.add('active');
+            
+            const lobbyScreen = document.getElementById('lobbyScreen');
+            lobbyScreen.classList.add('active');
+            lobbyScreen.style.display = 'flex';
+            
             document.getElementById('ui').classList.remove('hidden');
         }
 
@@ -1363,13 +1401,20 @@
 
         function showCharacterSelect() {
             hideAllScreens();
-            document.getElementById('characterSelect').classList.add('active');
+            
+            const charScreen = document.getElementById('characterSelect');
+            charScreen.classList.add('active');
+            charScreen.style.display = 'flex';
         }
 
         function backToTitle() {
             currentScreen = 'title';
             hideAllScreens();
-            document.getElementById('titleScreen').classList.add('active');
+            
+            const titleScreen = document.getElementById('titleScreen');
+            titleScreen.classList.add('active');
+            titleScreen.style.display = 'flex';
+            
             document.getElementById('ui').classList.add('hidden');
         }
 
@@ -1390,6 +1435,7 @@
         function hideAllScreens() {
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
+                screen.style.display = 'none';
             });
         }
 
@@ -1397,10 +1443,16 @@
             if (!player) return;
             
             currentScreen = 'dungeon';
+            
             hideAllScreens();
-            document.getElementById('dungeonScreen').classList.remove('hidden');
-            document.getElementById('dungeonScreen').classList.add('active');
+            
+            const dungeonScreen = document.getElementById('dungeonScreen');
+            dungeonScreen.classList.remove('hidden');
+            dungeonScreen.classList.add('active');
+            dungeonScreen.style.display = 'flex';
+            
             document.getElementById('dropMessage').textContent = '';
+            document.getElementById('ui').classList.remove('hidden');
             
             dungeon = new Dungeon(type, player);
         }
@@ -1412,11 +1464,27 @@
 
         function returnToLobby() {
             currentScreen = 'lobby';
-            hideAllScreens();
-            document.getElementById('lobbyScreen').classList.add('active');
+            
+            const dungeonScreen = document.getElementById('dungeonScreen');
+            dungeonScreen.classList.add('hidden');
+            dungeonScreen.classList.remove('active');
+            dungeonScreen.style.display = 'none';
+            
+            document.querySelectorAll('.screen').forEach(screen => {
+                if (screen.id !== 'lobbyScreen') {
+                    screen.classList.remove('active');
+                    screen.style.display = 'none';
+                }
+            });
+            
+            const lobbyScreen = document.getElementById('lobbyScreen');
+            lobbyScreen.classList.add('active');
+            lobbyScreen.style.display = 'flex';
+            
             document.querySelector('.completion-screen')?.remove();
             document.querySelector('.victory-screen')?.remove();
             document.getElementById('bossHealthContainer').classList.add('hidden');
+            document.getElementById('dropMessage').textContent = '';
             
             lobby = new Lobby(player);
         }
@@ -1434,7 +1502,9 @@
                 
                 if (e.key === 'Escape') {
                     if (currentScreen === 'dungeon') {
-                        returnToLobby();
+                        if (confirm('Deseja sair da dungeon?')) {
+                            returnToLobby();
+                        }
                     } else if (currentScreen === 'lobby') {
                         backToTitle();
                     }
@@ -1480,7 +1550,8 @@
                 if (dropMessageTimer > 0) {
                     dropMessageTimer--;
                     if (dropMessageTimer <= 0) {
-                        document.getElementById('dropMessage').textContent = '';
+                        const dropMsg = document.getElementById('dropMessage');
+                        if (dropMsg) dropMsg.textContent = '';
                     }
                 }
             }, 150);
