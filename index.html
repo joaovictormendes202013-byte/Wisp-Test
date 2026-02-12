@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHADOW BULLET HELL - DROPS & INVENTÁRIO</title>
+    <title>SHADOW BULLET HELL - RPG</title>
     <style>
         * {
             margin: 0;
@@ -13,12 +13,12 @@
         }
 
         body {
-            background: radial-gradient(circle at center, #1a1a2e, #0a0a1a);
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Courier New', monospace;
+            font-family: 'Segoe UI', 'Courier New', monospace;
             overflow: hidden;
         }
 
@@ -28,7 +28,7 @@
             height: 800px;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(138, 43, 226, 0.5);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
         canvas {
@@ -40,18 +40,20 @@
             display: block;
         }
 
+        /* ===== TELAS ===== */
         .screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 10, 26, 0.95);
+            background: radial-gradient(circle at center, #0a0a1a, #03030a);
             display: none;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             z-index: 100;
+            color: white;
         }
 
         .screen.active {
@@ -62,27 +64,37 @@
             display: none !important;
         }
 
-        /* Tela de Título */
+        /* ===== MENU PRINCIPAL ===== */
         .title-logo {
-            font-size: 72px;
-            font-weight: bold;
+            font-size: 82px;
+            font-weight: 900;
             color: #ffd700;
-            text-shadow: 0 0 30px #8a2be2, 0 0 60px #4a0080, 0 0 100px #ffd700;
+            text-shadow: 0 0 30px #8a2be2, 0 0 60px #4a0080, 0 0 100px #ff8c00;
             animation: glowPulse 2s infinite;
             margin-bottom: 20px;
+            letter-spacing: 12px;
+            text-transform: uppercase;
+        }
+
+        .title-sub {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 60px;
             letter-spacing: 8px;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 15px;
         }
 
         @keyframes glowPulse {
             0%, 100% { text-shadow: 0 0 30px #8a2be2, 0 0 60px #4a0080, 0 0 100px #ffd700; }
-            50% { text-shadow: 0 0 50px #ffd700, 0 0 100px #8a2be2, 0 0 150px #4a0080; }
+            50% { text-shadow: 0 0 50px #ffd700, 0 0 100px #8a2be2, 0 0 150px #ff8c00; }
         }
 
         .menu-buttons {
             display: flex;
             flex-direction: column;
             gap: 20px;
-            width: 400px;
+            width: 450px;
         }
 
         .menu-btn {
@@ -90,62 +102,109 @@
             font-size: 22px;
             font-weight: bold;
             border: none;
-            border-radius: 15px;
+            border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
             text-transform: uppercase;
             letter-spacing: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid #8a2be2;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .menu-btn:hover::before {
+            left: 100%;
         }
 
         .menu-btn.primary {
             background: linear-gradient(45deg, #ffd700, #ff8c00);
             color: #000;
+            border: none;
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
         }
 
         .menu-btn:hover {
-            transform: translateY(-5px) scale(1.05);
+            transform: translateY(-5px) scale(1.02);
             box-shadow: 0 10px 30px rgba(138, 43, 226, 0.7);
+            border-color: #ffd700;
         }
 
-        /* Grade de Raças */
+        /* ===== SELEÇÃO DE RAÇAS ===== */
+        .selection-title {
+            font-size: 48px;
+            color: #ffd700;
+            margin-bottom: 40px;
+            text-shadow: 0 0 20px #8a2be2;
+            letter-spacing: 6px;
+        }
+
         .race-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 30px;
-            padding: 40px;
+            padding: 20px;
             max-width: 1000px;
         }
 
         .race-card {
-            background: linear-gradient(135deg, rgba(20,20,40,0.9), rgba(10,10,20,0.95));
+            background: linear-gradient(135deg, rgba(30, 30, 50, 0.9), rgba(10, 10, 30, 0.95));
             border: 2px solid #8a2be2;
             border-radius: 20px;
             padding: 30px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .race-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-10px) scale(1.05);
             border-color: #ffd700;
-            box-shadow: 0 0 50px rgba(138, 43, 226, 0.5);
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.6);
         }
 
         .race-icon {
-            font-size: 64px;
+            font-size: 80px;
             margin-bottom: 15px;
         }
 
         .race-name {
-            font-size: 28px;
+            font-size: 32px;
             color: #ffd700;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-weight: bold;
         }
 
-        /* Lobby UI */
+        .race-desc {
+            color: #ccc;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .race-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            color: #8a2be2;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* ===== LOBBY UI ===== */
         .lobby-ui {
             position: absolute;
             bottom: 30px;
@@ -155,87 +214,110 @@
         }
 
         .player-lobby-info {
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.85);
             border: 2px solid #ffd700;
             border-radius: 15px;
-            padding: 15px 30px;
+            padding: 20px 35px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: white;
             font-size: 20px;
             margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .player-name {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 24px;
         }
 
         .npc-hint {
-            background: rgba(0,0,0,0.6);
+            background: rgba(0, 0, 0, 0.7);
             border: 1px solid #8a2be2;
-            border-radius: 10px;
-            padding: 12px 20px;
+            border-radius: 50px;
+            padding: 15px 25px;
             color: white;
-            font-size: 16px;
+            font-size: 18px;
+            backdrop-filter: blur(5px);
+            display: flex;
+            gap: 20px;
         }
 
         .keybind {
-            background: rgba(255,215,0,0.2);
+            background: rgba(255, 215, 0, 0.2);
             border: 1px solid #ffd700;
-            border-radius: 5px;
-            padding: 4px 8px;
-            margin: 0 5px;
+            border-radius: 8px;
+            padding: 5px 12px;
             color: #ffd700;
             font-weight: bold;
         }
 
-        /* Dialog NPC */
+        /* ===== DIALOGO NPC ===== */
         .npc-dialog {
             position: absolute;
-            bottom: 200px;
+            bottom: 250px;
             left: 50%;
             transform: translateX(-50%);
-            width: 600px;
-            background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(20,20,40,0.95));
+            width: 700px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 50, 0.95));
             border: 3px solid #ffd700;
-            border-radius: 20px;
-            padding: 30px;
+            border-radius: 30px;
+            padding: 35px;
             z-index: 300;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
         }
 
         .dialog-npc-name {
-            font-size: 28px;
+            font-size: 32px;
             color: #ffd700;
             margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
         }
 
         .dialog-text {
             color: white;
-            font-size: 18px;
-            margin-bottom: 25px;
+            font-size: 20px;
+            margin-bottom: 30px;
+            line-height: 1.6;
         }
 
         .dialog-options {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
 
         .dialog-option {
-            background: rgba(138,43,226,0.2);
+            background: rgba(138, 43, 226, 0.2);
             border: 2px solid #8a2be2;
-            border-radius: 10px;
-            padding: 12px 20px;
+            border-radius: 15px;
+            padding: 15px 25px;
             color: white;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 18px;
+            font-size: 20px;
+            text-align: left;
         }
 
         .dialog-option:hover {
             background: #8a2be2;
             border-color: #ffd700;
-            transform: translateX(10px);
+            transform: translateX(15px);
+            box-shadow: 0 0 20px #8a2be2;
         }
 
-        /* Dungeon UI */
+        /* ===== DUNGEON UI ===== */
         .dungeon-ui {
             position: absolute;
             top: 30px;
@@ -245,31 +327,40 @@
         }
 
         .dungeon-info {
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.85);
             border: 2px solid #ff4500;
             border-radius: 15px;
-            padding: 15px 25px;
+            padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             color: white;
-            font-size: 20px;
-            margin-bottom: 15px;
+            font-size: 22px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .dungeon-name {
+            color: #ff4500;
+            font-weight: bold;
         }
 
         .boss-health {
-            background: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #ff0000;
             border-radius: 15px;
-            padding: 20px;
+            padding: 25px;
             margin-bottom: 20px;
+            backdrop-filter: blur(5px);
         }
 
         .boss-health-bar {
             width: 100%;
-            height: 25px;
+            height: 30px;
             background: #330000;
             border-radius: 15px;
             overflow: hidden;
+            border: 1px solid #ff0000;
         }
 
         #bossHealthFill {
@@ -277,14 +368,85 @@
             width: 0%;
             background: linear-gradient(90deg, #ff0000, #ff8c00);
             transition: width 0.2s;
+            position: relative;
+        }
+
+        #bossHealthFill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .drop-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffd700;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 20px #ffd700, 0 0 40px #8a2be2;
+            z-index: 250;
+            text-align: center;
+            animation: dropFloat 1s ease;
+            pointer-events: none;
+        }
+
+        @keyframes dropFloat {
+            0% { opacity: 0; transform: translate(-50%, 0); }
+            20% { opacity: 1; transform: translate(-50%, -30px); }
+            80% { opacity: 1; transform: translate(-50%, -30px); }
+            100% { opacity: 0; transform: translate(-50%, -60px); }
+        }
+
+        /* ===== UI PRINCIPAL ===== */
+        #ui {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            color: white;
+            font-size: 20px;
+            z-index: 150;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 25px 35px;
+            border-radius: 20px;
+            border: 2px solid #ffd700;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            min-width: 350px;
+        }
+
+        .stat-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 12px 0;
+        }
+
+        .health-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
         }
 
         .health-bar {
-            width: 200px;
-            height: 15px;
+            flex: 1;
+            height: 20px;
             background: #330000;
             border-radius: 10px;
             overflow: hidden;
+            border: 1px solid #ffd700;
         }
 
         #playerHealthFill {
@@ -294,103 +456,171 @@
             transition: width 0.2s;
         }
 
-        /* Inventário */
+        /* ===== INVENTÁRIO ===== */
         .inventory-panel {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 800px;
-            background: rgba(0,0,0,0.95);
+            width: 1000px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.97), rgba(20, 20, 50, 0.97));
             border: 3px solid #ffd700;
-            border-radius: 20px;
-            padding: 30px;
+            border-radius: 30px;
+            padding: 40px;
             z-index: 400;
             color: white;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 100px rgba(255, 215, 0, 0.3);
+        }
+
+        .inventory-title {
+            font-size: 48px;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 6px;
+            text-shadow: 0 0 20px #8a2be2;
+        }
+
+        .inventory-content {
+            display: flex;
+            gap: 40px;
+        }
+
+        .equipment-section {
+            flex: 1;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid #8a2be2;
+        }
+
+        .equipment-slot {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .equipment-slot:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: scale(1.02);
         }
 
         .inventory-grid {
+            flex: 2;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
-            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
         }
 
         .inventory-slot {
-            background: rgba(138,43,226,0.2);
+            background: rgba(138, 43, 226, 0.15);
             border: 2px solid #8a2be2;
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 15px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            min-height: 100px;
+            position: relative;
+            overflow: hidden;
         }
 
         .inventory-slot:hover {
-            background: rgba(138,43,226,0.5);
+            background: rgba(138, 43, 226, 0.4);
             border-color: #ffd700;
-            transform: scale(1.05);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(138, 43, 226, 0.5);
         }
 
-        .equipment-slot {
-            background: rgba(255,215,0,0.2);
-            border: 2px solid #ffd700;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            min-height: 100px;
-        }
+        .item-rarity-comum { color: #aaa; }
+        .item-rarity-raro { color: #00aaff; }
+        .item-rarity-epico { color: #aa00ff; }
+        .item-rarity-lendario { color: #ffaa00; text-shadow: 0 0 10px #ffaa00; }
 
-        .version {
-            position: absolute;
-            bottom: 20px;
-            right: 30px;
-            color: rgba(255,255,255,0.5);
-            font-size: 14px;
-        }
-
-        .back-btn {
-            margin-top: 40px;
-            padding: 12px 30px;
-            font-size: 18px;
-            background: rgba(255,0,0,0.3);
-            border: 2px solid #ff0000;
-            color: white;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        .back-btn:hover {
-            background: #ff0000;
-        }
-
+        /* ===== VITÓRIA / DERROTA ===== */
         .victory-screen, .completion-screen {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.95);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(20, 20, 50, 0.98));
             border: 3px solid #ffd700;
-            border-radius: 20px;
-            padding: 40px;
+            border-radius: 30px;
+            padding: 50px;
             text-align: center;
             color: white;
-            z-index: 400;
-            min-width: 500px;
+            z-index: 500;
+            min-width: 600px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 100px rgba(255, 215, 0, 0.4);
+            animation: fadeIn 0.5s;
         }
 
-        #ui {
-            position: absolute;
-            top: 20px;
-            left: 20px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -30%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        .victory-title {
+            font-size: 64px;
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-shadow: 0 0 30px #ffd700;
+        }
+
+        .rewards {
+            font-size: 24px;
+            margin: 30px 0;
+            line-height: 2;
+            background: rgba(138, 43, 226, 0.2);
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid #8a2be2;
+        }
+
+        .back-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 20px;
+            background: rgba(255, 0, 0, 0.3);
+            border: 2px solid #ff0000;
             color: white;
-            font-size: 18px;
-            z-index: 150;
-            background: rgba(0,0,0,0.7);
-            padding: 20px;
-            border-radius: 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #ff0000;
+            transform: scale(1.1);
+            box-shadow: 0 0 30px #ff0000;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8a2be2, #4a0080);
+            border-radius: 10px;
             border: 1px solid #ffd700;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ffd700, #8a2be2);
         }
     </style>
 </head>
@@ -398,63 +628,114 @@
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
         
+        <!-- UI Principal do Jogo -->
+        <div id="ui" class="hidden">
+            <div class="stat-row">
+                <span style="font-size: 28px;">👑</span>
+                <span id="playerNameUI" style="color: #ffd700; font-size: 24px;">Shadow Monarch</span>
+            </div>
+            <div class="stat-row">
+                <span>❤️</span>
+                <div class="health-bar-container">
+                    <div class="health-bar">
+                        <div id="playerHealthFill"></div>
+                    </div>
+                    <span id="healthText" style="min-width: 80px;">100/100</span>
+                </div>
+            </div>
+            <div class="stat-row">
+                <span>⚔️</span>
+                <span>Dano: <span id="damageText" style="color: #ff8c00; font-weight: bold;">20</span></span>
+                <span style="margin-left: 20px;">🛡️</span>
+                <span>Defesa: <span id="defenseText" style="color: #00aaff; font-weight: bold;">0</span></span>
+            </div>
+            <div class="stat-row">
+                <span>💰</span>
+                <span>Moedas: <span id="coinsText" style="color: #ffd700; font-weight: bold;">500</span></span>
+                <span style="margin-left: 20px;">📦</span>
+                <span>Itens: <span id="itemCountText">4</span></span>
+            </div>
+            <div class="stat-row">
+                <span>⚔️</span>
+                <span>Arma: <span id="weaponNameUI" style="color: #ff8c00;">Espada Inicial</span></span>
+            </div>
+        </div>
+        
         <!-- Tela de Título -->
         <div id="titleScreen" class="screen active">
-            <div class="title-logo">SHADOW BULLET HELL</div>
-            <div class="title-sub">RPG × Bullet Hell × DROPS</div>
+            <div class="title-logo">SHADOW HELL</div>
+            <div class="title-sub">BULLET HELL × RPG</div>
             
             <div class="menu-buttons">
                 <button class="menu-btn primary" onclick="startGame()">▶ INICIAR JORNADA</button>
-                <button class="menu-btn" onclick="showCharacterSelect()">📋 SELECIONAR RAÇA</button>
+                <button class="menu-btn" onclick="showCharacterSelect()">📋 ESCOLHER RAÇA</button>
                 <button class="menu-btn" onclick="showInventory()">🎒 INVENTÁRIO</button>
             </div>
             
-            <div class="version">v2.0 - Sistema de Drops e Itens</div>
+            <div style="position: absolute; bottom: 30px; right: 30px; color: rgba(255,255,255,0.5);">
+                v2.0 - Drops & Equipamentos
+            </div>
         </div>
         
         <!-- Tela de Seleção de Raça -->
         <div id="characterSelect" class="screen">
-            <h1 style="color: #ffd700; margin-bottom: 30px;">ESCOLHA SUA RAÇA</h1>
+            <div class="selection-title">⚔️ ESCOLHA SUA RAÇA</div>
             <div class="race-grid">
                 <div class="race-card" onclick="selectRace('shadowMonarch')">
                     <div class="race-icon">👑</div>
                     <div class="race-name">Shadow Monarch</div>
-                    <div class="race-desc">Dano +50% | Drop +20%</div>
+                    <div class="race-desc">O Rei das Sombras</div>
+                    <div class="race-stats">
+                        <span>⚔️ +50%</span>
+                        <span>🎁 +20%</span>
+                    </div>
                 </div>
                 <div class="race-card" onclick="selectRace('quincy')">
                     <div class="race-icon">🏹</div>
                     <div class="race-name">Quincy</div>
-                    <div class="race-desc">Velocidade +30% | Crítico +15%</div>
+                    <div class="race-desc">Arqueiro Celestial</div>
+                    <div class="race-stats">
+                        <span>⚡ +30%</span>
+                        <span>🎯 +15%</span>
+                    </div>
                 </div>
                 <div class="race-card" onclick="selectRace('hollow')">
                     <div class="race-icon">👹</div>
                     <div class="race-name">Vasto Lorde</div>
-                    <div class="race-desc">Vida +50% | Regeneração</div>
+                    <div class="race-desc">Hollow Supremo</div>
+                    <div class="race-stats">
+                        <span>❤️ +50%</span>
+                        <span>🔄 Regeneração</span>
+                    </div>
                 </div>
                 <div class="race-card" onclick="selectRace('joestar')">
                     <div class="race-icon">🌟</div>
                     <div class="race-name">Joestar</div>
-                    <div class="race-desc">Especial +30% | Sorte +20%</div>
+                    <div class="race-desc">Linhagem Heróica</div>
+                    <div class="race-stats">
+                        <span>🌀 +30%</span>
+                        <span>🍀 +20%</span>
+                    </div>
                 </div>
             </div>
-            <button class="back-btn" onclick="backToTitle()">VOLTAR</button>
+            <button class="back-btn" onclick="backToTitle()">VOLTAR AO MENU</button>
         </div>
         
         <!-- Tela do Lobby -->
         <div id="lobbyScreen" class="screen">
             <div class="lobby-ui">
                 <div class="player-lobby-info">
-                    <span id="lobbyPlayerName">Shadow Monarch</span>
-                    <span id="lobbyPlayerLevel">Nível 1</span>
-                    <span id="lobbyPlayerCoins">💰 500</span>
-                    <span id="lobbyPlayerWeapon">⚔️ Espada Inicial</span>
+                    <span class="player-name" id="lobbyPlayerName">Shadow Monarch</span>
+                    <span>Nível <span id="lobbyPlayerLevel">1</span></span>
+                    <span>💰 <span id="lobbyPlayerCoins">500</span></span>
+                    <span>⚔️ <span id="lobbyPlayerWeapon">Espada Inicial</span></span>
                 </div>
                 
                 <div class="npc-hint">
-                    <span class="keybind">[E]</span> Falar com NPC
-                    <span class="keybind">[WASD]</span> Mover
-                    <span class="keybind">[I]</span> Inventário
-                    <span class="keybind">[ESC]</span> Menu
+                    <span><span class="keybind">WASD</span> Mover</span>
+                    <span><span class="keybind">E</span> Falar com NPC</span>
+                    <span><span class="keybind">I</span> Inventário</span>
+                    <span><span class="keybind">ESC</span> Menu</span>
                 </div>
             </div>
             
@@ -469,115 +750,184 @@
         <div id="dungeonScreen" class="screen hidden">
             <div class="dungeon-ui">
                 <div class="dungeon-info">
-                    <span id="dungeonName">CAVERNA</span>
+                    <span class="dungeon-name" id="dungeonName">CAVERNA</span>
                     <span id="dungeonFloor">Andar 1/5</span>
-                    <span id="dungeonKills">💀 0/5</span>
+                    <span>💀 <span id="dungeonKills">0/5</span></span>
                 </div>
                 
                 <div id="bossHealthContainer" class="boss-health hidden">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #ff0000; font-size: 20px;">👑 BOSS</span>
+                        <span id="bossName" style="color: #ff8c00;">Rei Slime</span>
+                    </div>
                     <div class="boss-health-bar">
                         <div id="bossHealthFill"></div>
                     </div>
                 </div>
-                
-                <div id="dropMessage" style="color: #ffd700; margin-top: 10px; font-size: 18px;"></div>
             </div>
+            
+            <div id="dropMessage" class="drop-message hidden"></div>
         </div>
         
         <!-- Painel de Inventário -->
         <div id="inventoryPanel" class="inventory-panel hidden">
-            <h1 style="color: #ffd700; text-align: center; margin-bottom: 20px;">🎒 INVENTÁRIO</h1>
+            <div class="inventory-title">🎒 INVENTÁRIO</div>
             
-            <div style="display: flex; gap: 30px;">
-                <!-- Equipamentos -->
-                <div style="flex: 1;">
-                    <h3 style="color: #ffd700; margin-bottom: 15px;">⚔️ EQUIPADOS</h3>
-                    <div id="equipmentSlots" style="display: flex; flex-direction: column; gap: 10px;">
-                        <div class="equipment-slot" id="weaponSlot">
-                            <div style="font-size: 24px;">⚔️</div>
-                            <div id="equippedWeaponName">Nenhuma</div>
-                        </div>
-                        <div class="equipment-slot" id="armorSlot">
-                            <div style="font-size: 24px;">🛡️</div>
-                            <div id="equippedArmorName">Nenhuma</div>
-                        </div>
+            <div class="inventory-content">
+                <div class="equipment-section">
+                    <h2 style="color: #ffd700; margin-bottom: 20px; font-size: 28px;">⚔️ EQUIPADOS</h2>
+                    <div id="weaponSlot" class="equipment-slot">
+                        <div style="font-size: 48px; margin-bottom: 10px;">⚔️</div>
+                        <div style="font-size: 20px; color: #ffd700;" id="equippedWeaponName">Espada Inicial</div>
+                        <div style="color: #8a2be2; margin-top: 10px;" id="equippedWeaponDamage">Dano +20</div>
+                    </div>
+                    <div id="armorSlot" class="equipment-slot">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🛡️</div>
+                        <div style="font-size: 20px; color: #ffd700;" id="equippedArmorName">Nenhuma</div>
+                        <div style="color: #8a2be2; margin-top: 10px;" id="equippedArmorDefense">Defesa +0</div>
                     </div>
                 </div>
                 
-                <!-- Itens do Inventário -->
                 <div style="flex: 2;">
-                    <h3 style="color: #ffd700; margin-bottom: 15px;">📦 ITENS</h3>
+                    <h2 style="color: #ffd700; margin-bottom: 20px; font-size: 28px;">📦 ITENS</h2>
                     <div id="inventoryGrid" class="inventory-grid"></div>
                 </div>
             </div>
             
-            <div style="display: flex; justify-content: space-between; margin-top: 30px;">
-                <span>💰 Moedas: <span id="inventoryCoins">500</span></span>
-                <button class="menu-btn" onclick="closeInventory()" style="padding: 10px 20px; font-size: 16px;">FECHAR</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #8a2be2;">
+                <span style="font-size: 24px;">💰 Moedas: <span style="color: #ffd700; font-weight: bold;" id="inventoryCoins">500</span></span>
+                <button class="menu-btn" onclick="closeInventory()" style="padding: 12px 30px; font-size: 18px;">FECHAR</button>
             </div>
-        </div>
-        
-        <!-- UI Principal -->
-        <div id="ui" class="hidden">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <span>❤️</span>
-                <div class="health-bar">
-                    <div id="playerHealthFill"></div>
-                </div>
-                <span id="healthText">100/100</span>
-            </div>
-            <div style="margin-top: 10px;">💰 <span id="coinsText">500</span></div>
-            <div>⚔️ Dano: <span id="damageText">20</span></div>
-            <div>🛡️ Defesa: <span id="defenseText">0</span></div>
         </div>
     </div>
 
     <script>
         // ============= SISTEMA DE ITENS =============
         const ITEMS = {
-            // Armas
-            'Espada Inicial': { type: 'weapon', damage: 20, value: 50, emoji: '⚔️', rarity: 'comum' },
-            'Espada Longa': { type: 'weapon', damage: 35, value: 150, emoji: '⚔️', rarity: 'incomum' },
-            'Lâmina Sombria': { type: 'weapon', damage: 50, value: 300, emoji: '🗡️', rarity: 'raro' },
-            'Excalibur': { type: 'weapon', damage: 100, value: 1000, emoji: '⚔️✨', rarity: 'lendário' },
-            'Espada do Rei': { type: 'weapon', damage: 75, value: 500, emoji: '👑', rarity: 'épico' },
-            
-            // Armaduras
-            'Armadura de Couro': { type: 'armor', defense: 10, value: 100, emoji: '🛡️', rarity: 'comum' },
-            'Armadura de Ferro': { type: 'armor', defense: 20, value: 250, emoji: '🛡️', rarity: 'incomum' },
-            'Armadura das Sombras': { type: 'armor', defense: 35, value: 500, emoji: '🛡️🌑', rarity: 'raro' },
-            'Armadura Sagrada': { type: 'armor', defense: 50, value: 800, emoji: '🛡️✨', rarity: 'lendário' },
-            
-            // Poções
-            'Poção de Vida': { type: 'consumable', heal: 50, value: 50, emoji: '🧪', rarity: 'comum' },
-            'Poção de Vida Grande': { type: 'consumable', heal: 100, value: 100, emoji: '🧪✨', rarity: 'raro' },
-            
-            // Drops especiais
-            'Fragmento Sombrio': { type: 'material', value: 200, emoji: '💎', rarity: 'raro' },
-            'Essência do Abismo': { type: 'material', value: 500, emoji: '🔮', rarity: 'épico' },
-            'Coração do Dragão': { type: 'material', value: 1000, emoji: '❤️🔥', rarity: 'lendário' }
+            'Espada Inicial': { 
+                type: 'weapon', 
+                damage: 20, 
+                value: 50, 
+                emoji: '⚔️', 
+                rarity: 'comum',
+                description: 'Uma espada básica'
+            },
+            'Espada Longa': { 
+                type: 'weapon', 
+                damage: 35, 
+                value: 150, 
+                emoji: '⚔️', 
+                rarity: 'raro',
+                description: 'Espada de aço reforçado'
+            },
+            'Lâmina Sombria': { 
+                type: 'weapon', 
+                damage: 50, 
+                value: 300, 
+                emoji: '🗡️', 
+                rarity: 'épico',
+                description: 'Forjada nas sombras'
+            },
+            'Excalibur': { 
+                type: 'weapon', 
+                damage: 100, 
+                value: 1000, 
+                emoji: '⚔️✨', 
+                rarity: 'lendário',
+                description: 'A espada sagrada'
+            },
+            'Armadura de Couro': { 
+                type: 'armor', 
+                defense: 10, 
+                value: 100, 
+                emoji: '🛡️', 
+                rarity: 'comum',
+                description: 'Proteção leve'
+            },
+            'Armadura de Ferro': { 
+                type: 'armor', 
+                defense: 20, 
+                value: 250, 
+                emoji: '🛡️', 
+                rarity: 'raro',
+                description: 'Proteção pesada'
+            },
+            'Armadura das Sombras': { 
+                type: 'armor', 
+                defense: 35, 
+                value: 500, 
+                emoji: '🛡️🌑', 
+                rarity: 'épico',
+                description: 'Forjada na escuridão'
+            },
+            'Armadura Sagrada': { 
+                type: 'armor', 
+                defense: 50, 
+                value: 800, 
+                emoji: '🛡️✨', 
+                rarity: 'lendário',
+                description: 'Proteção divina'
+            },
+            'Poção de Vida': { 
+                type: 'consumable', 
+                heal: 50, 
+                value: 50, 
+                emoji: '🧪', 
+                rarity: 'comum',
+                description: 'Cura 50 de vida'
+            },
+            'Poção de Vida Grande': { 
+                type: 'consumable', 
+                heal: 100, 
+                value: 100, 
+                emoji: '🧪✨', 
+                rarity: 'raro',
+                description: 'Cura 100 de vida'
+            },
+            'Fragmento Sombrio': { 
+                type: 'material', 
+                value: 200, 
+                emoji: '💎', 
+                rarity: 'raro',
+                description: 'Vale 200 moedas'
+            },
+            'Essência do Abismo': { 
+                type: 'material', 
+                value: 500, 
+                emoji: '🔮', 
+                rarity: 'épico',
+                description: 'Vale 500 moedas'
+            },
+            'Coração do Dragão': { 
+                type: 'material', 
+                value: 1000, 
+                emoji: '❤️🔥', 
+                rarity: 'lendário',
+                description: 'Vale 1000 moedas'
+            }
         };
 
-        // Drops por tipo de inimigo
         const DROP_TABLES = {
             'Slime': [
-                { item: 'Poção de Vida', chance: 0.3 },
-                { item: 'Fragmento Sombrio', chance: 0.1 }
+                { item: 'Poção de Vida', chance: 0.4 },
+                { item: 'Fragmento Sombrio', chance: 0.15 },
+                { item: 'Espada Longa', chance: 0.05 }
             ],
             'Rei Slime': [
-                { item: 'Espada Longa', chance: 0.5 },
-                { item: 'Poção de Vida Grande', chance: 0.4 },
-                { item: 'Essência do Abismo', chance: 0.2 }
+                { item: 'Poção de Vida Grande', chance: 0.6 },
+                { item: 'Essência do Abismo', chance: 0.3 },
+                { item: 'Armadura de Ferro', chance: 0.2 },
+                { item: 'Excalibur', chance: 0.05 }
             ],
             'Espírito da Floresta': [
-                { item: 'Armadura de Ferro', chance: 0.5 },
-                { item: 'Poção de Vida Grande', chance: 0.3 },
-                { item: 'Fragmento Sombrio', chance: 0.3 }
+                { item: 'Poção de Vida Grande', chance: 0.5 },
+                { item: 'Armadura das Sombras', chance: 0.25 },
+                { item: 'Fragmento Sombrio', chance: 0.4 }
             ],
             'Dragão Ancião': [
-                { item: 'Excalibur', chance: 0.2 },
-                { item: 'Armadura Sagrada', chance: 0.2 },
-                { item: 'Coração do Dragão', chance: 0.4 }
+                { item: 'Excalibur', chance: 0.3 },
+                { item: 'Armadura Sagrada', chance: 0.3 },
+                { item: 'Coração do Dragão', chance: 0.5 }
             ]
         };
 
@@ -591,6 +941,7 @@
         let isMouseDown = false;
         let animationFrame;
         let dropMessageTimer = 0;
+        let dropMessageText = '';
 
         // ============= CLASSE DO JOGADOR =============
         class Player {
@@ -610,8 +961,11 @@
                 this.y = 400;
                 this.bullets = [];
                 
-                // Inventário e equipamentos
-                this.inventory = { 'Espada Inicial': 1, 'Poção de Vida': 3 };
+                this.inventory = { 
+                    'Espada Inicial': 1,
+                    'Poção de Vida': 3 
+                };
+                
                 this.equipment = {
                     weapon: 'Espada Inicial',
                     armor: null
@@ -642,13 +996,11 @@
             }
 
             updateStats() {
-                // Calcular dano total (base + arma)
                 this.damage = this.baseDamage;
                 if (this.equipment.weapon && ITEMS[this.equipment.weapon]) {
                     this.damage += ITEMS[this.equipment.weapon].damage || 0;
                 }
                 
-                // Calcular defesa total
                 this.defense = this.baseDefense;
                 if (this.equipment.armor && ITEMS[this.equipment.armor]) {
                     this.defense += ITEMS[this.equipment.armor].defense || 0;
@@ -662,13 +1014,32 @@
                 document.getElementById('defenseText').textContent = this.defense;
                 document.getElementById('coinsText').textContent = this.coins;
                 document.getElementById('inventoryCoins').textContent = this.coins;
+                document.getElementById('playerNameUI').textContent = 
+                    this.race === 'shadowMonarch' ? 'Shadow Monarch' : 
+                    this.race === 'quincy' ? 'Quincy' : 
+                    this.race === 'hollow' ? 'Vasto Lorde' : 'Joestar';
+                
+                let itemCount = 0;
+                for (let item in this.inventory) {
+                    itemCount += this.inventory[item];
+                }
+                document.getElementById('itemCountText').textContent = itemCount;
                 
                 if (this.equipment.weapon) {
                     document.getElementById('equippedWeaponName').textContent = this.equipment.weapon;
-                    document.getElementById('lobbyPlayerWeapon').innerHTML = `⚔️ ${this.equipment.weapon}`;
+                    document.getElementById('weaponNameUI').textContent = this.equipment.weapon;
+                    document.getElementById('lobbyPlayerWeapon').textContent = this.equipment.weapon;
+                    const weaponDamage = ITEMS[this.equipment.weapon]?.damage || 0;
+                    document.getElementById('equippedWeaponDamage').textContent = `Dano +${weaponDamage}`;
                 }
+                
                 if (this.equipment.armor) {
                     document.getElementById('equippedArmorName').textContent = this.equipment.armor;
+                    const armorDefense = ITEMS[this.equipment.armor]?.defense || 0;
+                    document.getElementById('equippedArmorDefense').textContent = `Defesa +${armorDefense}`;
+                } else {
+                    document.getElementById('equippedArmorName').textContent = 'Nenhuma';
+                    document.getElementById('equippedArmorDefense').textContent = 'Defesa +0';
                 }
             }
 
@@ -678,15 +1049,18 @@
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance > 0) {
-                    this.bullets.push({
-                        x: this.x,
-                        y: this.y,
-                        vx: (dx / distance) * 12,
-                        vy: (dy / distance) * 12,
-                        damage: this.damage,
-                        color: '#8a2be2',
-                        radius: 6
-                    });
+                    for (let i = 0; i < 3; i++) {
+                        const spread = (Math.random() - 0.5) * 0.2;
+                        this.bullets.push({
+                            x: this.x,
+                            y: this.y - 10,
+                            vx: (dx / distance) * 12 + (Math.random() - 0.5) * 2,
+                            vy: (dy / distance) * 12 + (Math.random() - 0.5) * 2,
+                            damage: this.damage,
+                            color: `hsl(${280 + Math.random() * 40}, 100%, 50%)`,
+                            radius: 5 + Math.random() * 3
+                        });
+                    }
                 }
             }
 
@@ -707,6 +1081,7 @@
                 const percent = (this.health / this.maxHealth) * 100;
                 document.getElementById('playerHealthFill').style.width = `${percent}%`;
                 document.getElementById('healthText').innerHTML = `${Math.floor(this.health)}/${this.maxHealth}`;
+                this.showDropMessage(`❤️ +${amount} vida`, '#00ff00');
             }
 
             addItem(itemName, quantity = 1) {
@@ -715,6 +1090,7 @@
                 }
                 this.inventory[itemName] += quantity;
                 this.updateInventoryUI();
+                this.updateUI();
             }
 
             removeItem(itemName, quantity = 1) {
@@ -724,6 +1100,7 @@
                         delete this.inventory[itemName];
                     }
                     this.updateInventoryUI();
+                    this.updateUI();
                     return true;
                 }
                 return false;
@@ -734,46 +1111,18 @@
                 if (!item) return false;
                 
                 if (item.type === 'weapon' || item.type === 'armor') {
-                    // Desequipar item atual
                     const currentEquip = this.equipment[item.type];
                     if (currentEquip) {
                         this.addItem(currentEquip);
                     }
                     
-                    // Equipar novo item
                     this.equipment[item.type] = itemName;
                     this.removeItem(itemName);
                     this.updateStats();
-                    
+                    this.showDropMessage(`⚔️ Equipou ${itemName}!`, '#ffd700');
                     return true;
                 }
                 return false;
-            }
-
-            updateInventoryUI() {
-                const grid = document.getElementById('inventoryGrid');
-                grid.innerHTML = '';
-                
-                Object.entries(this.inventory).forEach(([item, quantity]) => {
-                    const itemData = ITEMS[item];
-                    if (!itemData) return;
-                    
-                    const slot = document.createElement('div');
-                    slot.className = 'inventory-slot';
-                    slot.innerHTML = `
-                        <div style="font-size: 32px; margin-bottom: 5px;">${itemData.emoji}</div>
-                        <div style="font-weight: bold;">${item}</div>
-                        <div style="color: ${itemData.rarity === 'lendário' ? '#ffd700' : '#8a2be2'};">
-                            ${itemData.type === 'weapon' ? `⚔️ +${itemData.damage}` : ''}
-                            ${itemData.type === 'armor' ? `🛡️ +${itemData.defense}` : ''}
-                            ${itemData.type === 'consumable' ? `❤️ +${itemData.heal}` : ''}
-                        </div>
-                        <div style="margin-top: 5px;">x${quantity}</div>
-                    `;
-                    
-                    slot.onclick = () => this.useItem(item);
-                    grid.appendChild(slot);
-                });
             }
 
             useItem(itemName) {
@@ -783,18 +1132,60 @@
                 if (item.type === 'consumable') {
                     if (this.removeItem(itemName)) {
                         this.heal(item.heal);
-                        this.showDropMessage(`🧪 Usou ${itemName}! +${item.heal} vida`);
                     }
                 } else if (item.type === 'weapon' || item.type === 'armor') {
-                    if (this.equipItem(itemName)) {
-                        this.showDropMessage(`⚔️ Equipou ${itemName}!`);
-                    }
+                    this.equipItem(itemName);
                 }
             }
 
-            showDropMessage(msg) {
+            updateInventoryUI() {
+                const grid = document.getElementById('inventoryGrid');
+                grid.innerHTML = '';
+                
+                const items = Object.entries(this.inventory).sort((a, b) => {
+                    const rarityA = ITEMS[a[0]]?.rarity || 'comum';
+                    const rarityB = ITEMS[b[0]]?.rarity || 'comum';
+                    const rarityOrder = { 'lendário': 0, 'épico': 1, 'raro': 2, 'comum': 3 };
+                    return (rarityOrder[rarityA] || 99) - (rarityOrder[rarityB] || 99);
+                });
+                
+                items.forEach(([item, quantity]) => {
+                    const itemData = ITEMS[item];
+                    if (!itemData) return;
+                    
+                    const slot = document.createElement('div');
+                    slot.className = `inventory-slot item-rarity-${itemData.rarity}`;
+                    
+                    let stats = '';
+                    if (itemData.type === 'weapon') stats = `⚔️ +${itemData.damage}`;
+                    if (itemData.type === 'armor') stats = `🛡️ +${itemData.defense}`;
+                    if (itemData.type === 'consumable') stats = `❤️ +${itemData.heal}`;
+                    
+                    slot.innerHTML = `
+                        <div style="font-size: 40px; margin-bottom: 10px;">${itemData.emoji}</div>
+                        <div style="font-weight: bold; font-size: 16px; color: white;">${item}</div>
+                        <div style="color: ${itemData.rarity === 'lendário' ? '#ffd700' : '#8a2be2'}; margin: 8px 0;">
+                            ${stats}
+                        </div>
+                        <div style="font-size: 14px; color: #ccc;">${itemData.description || ''}</div>
+                        <div style="margin-top: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px;">
+                            x${quantity}
+                        </div>
+                    `;
+                    
+                    slot.onclick = () => this.useItem(item);
+                    grid.appendChild(slot);
+                });
+                
+                this.updateUI();
+            }
+
+            showDropMessage(msg, color = '#ffd700') {
+                dropMessageText = msg;
                 const dropMsg = document.getElementById('dropMessage');
                 dropMsg.textContent = msg;
+                dropMsg.style.color = color;
+                dropMsg.classList.remove('hidden');
                 dropMessageTimer = 120;
             }
 
@@ -807,20 +1198,24 @@
             }
 
             draw(ctx) {
-                // Tiros
                 this.bullets.forEach(b => {
                     ctx.shadowBlur = 15;
                     ctx.shadowColor = b.color;
                     ctx.beginPath();
                     ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = b.color;
+                    
+                    const gradient = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius);
+                    gradient.addColorStop(0, b.color);
+                    gradient.addColorStop(1, '#4a0080');
+                    
+                    ctx.fillStyle = gradient;
                     ctx.fill();
                 });
                 
-                ctx.shadowBlur = 20;
+                ctx.shadowBlur = 30;
                 ctx.shadowColor = '#8a2be2';
                 
-                // Corpo do jogador
+                // Corpo
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, 20, 0, Math.PI * 2);
                 ctx.fillStyle = '#1a1a2e';
@@ -833,6 +1228,13 @@
                 ctx.lineTo(this.x + 25, this.y - 15);
                 ctx.fillStyle = '#4a0080';
                 ctx.fill();
+                
+                // Arma equipada
+                if (this.equipment.weapon) {
+                    ctx.font = '30px Arial';
+                    ctx.fillStyle = '#ffd700';
+                    ctx.fillText('⚔️', this.x + 25, this.y - 25);
+                }
                 
                 // Olhos
                 ctx.shadowBlur = 15;
@@ -853,7 +1255,6 @@
                 this.npcs = [];
                 this.nearbyNPC = null;
                 this.activeDialog = false;
-                
                 this.initNPCs();
             }
 
@@ -869,8 +1270,8 @@
                         dialog: {
                             welcome: 'Bem-vindo, aventureiro! Deseja entrar em uma dungeon?',
                             options: [
-                                { text: '⚔️ Caverna (Nível 1+)', action: 'dungeon', dungeon: 'caverna' },
-                                { text: '🌳 Floresta (Nível 10+)', action: 'dungeon', dungeon: 'floresta' },
+                                { text: '⚔️ Caverna dos Slimes (Nível 1+)', action: 'dungeon', dungeon: 'caverna' },
+                                { text: '🌳 Floresta dos Espíritos (Nível 10+)', action: 'dungeon', dungeon: 'floresta' },
                                 { text: '🔥 Covil do Dragão (Nível 25+)', action: 'dungeon', dungeon: 'covil' },
                                 { text: '❌ Cancelar', action: 'close' }
                             ]
@@ -886,7 +1287,7 @@
                         dialog: {
                             welcome: 'Quer vender seus itens?',
                             options: [
-                                { text: '💰 Vender Itens', action: 'sell' },
+                                { text: '💰 Vender Materiais', action: 'sell' },
                                 { text: '❌ Sair', action: 'close' }
                             ]
                         }
@@ -895,7 +1296,6 @@
             }
 
             update() {
-                // Movimento
                 if (keys.w || keys.arrowup) this.player.y -= this.player.speed;
                 if (keys.s || keys.arrowdown) this.player.y += this.player.speed;
                 if (keys.a || keys.arrowleft) this.player.x -= this.player.speed;
@@ -904,7 +1304,6 @@
                 this.player.x = Math.max(50, Math.min(1150, this.player.x));
                 this.player.y = Math.max(50, Math.min(750, this.player.y));
 
-                // Proximidade com NPCs
                 this.nearbyNPC = null;
                 let minDistance = 100;
 
@@ -918,25 +1317,22 @@
                     }
                 });
 
-                // Update UI
                 document.getElementById('lobbyPlayerName').textContent = 
                     this.player.race === 'shadowMonarch' ? 'Shadow Monarch' : 
                     this.player.race === 'quincy' ? 'Quincy' : 
                     this.player.race === 'hollow' ? 'Vasto Lorde' : 'Joestar';
-                document.getElementById('lobbyPlayerLevel').textContent = `Nível ${this.player.level}`;
-                document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
+                document.getElementById('lobbyPlayerLevel').textContent = this.player.level;
+                document.getElementById('lobbyPlayerCoins').textContent = this.player.coins;
             }
 
             draw(ctx) {
-                // Fundo gradiente
                 const gradient = ctx.createLinearGradient(0, 0, 0, 800);
                 gradient.addColorStop(0, '#1a2a3a');
                 gradient.addColorStop(1, '#0a1a2a');
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, 1200, 800);
 
-                // Grade
-                ctx.strokeStyle = 'rgba(138, 43, 226, 0.2)';
+                ctx.strokeStyle = 'rgba(138, 43, 226, 0.1)';
                 ctx.lineWidth = 1;
                 for (let i = 0; i < 1200; i += 50) {
                     ctx.beginPath();
@@ -951,17 +1347,25 @@
                     ctx.stroke();
                 }
 
-                // NPCs
+                ctx.fillStyle = '#228B22';
+                for (let i = 0; i < 8; i++) {
+                    ctx.beginPath();
+                    ctx.arc(150 + i * 150, 700 + Math.sin(Date.now() * 0.001 + i) * 10, 8, 0, Math.PI * 2);
+                    ctx.fillStyle = '#32CD32';
+                    ctx.fill();
+                }
+
                 this.npcs.forEach(npc => {
-                    ctx.shadowBlur = 20;
+                    ctx.shadowBlur = 30;
                     ctx.shadowColor = npc.color;
-                    ctx.font = '48px Arial';
+                    ctx.font = '64px Arial';
                     ctx.fillStyle = npc.color;
-                    ctx.fillText(npc.sprite, npc.x - 24, npc.y - 24);
+                    ctx.fillText(npc.sprite, npc.x - 32, npc.y - 32);
                     
-                    ctx.font = 'bold 16px "Courier New"';
+                    ctx.shadowBlur = 10;
+                    ctx.font = 'bold 20px "Courier New"';
                     ctx.fillStyle = 'white';
-                    ctx.fillText(npc.name, npc.x - 60, npc.y - 50);
+                    ctx.fillText(npc.name, npc.x - 80, npc.y - 70);
                     
                     ctx.shadowBlur = 0;
 
@@ -969,12 +1373,13 @@
                         ctx.strokeStyle = '#ffd700';
                         ctx.lineWidth = 3;
                         ctx.beginPath();
-                        ctx.arc(npc.x, npc.y, 50, 0, Math.PI * 2);
+                        ctx.arc(npc.x, npc.y, 70, 0, Math.PI * 2);
                         ctx.stroke();
                         
-                        ctx.font = '20px Arial';
+                        ctx.font = 'bold 24px Arial';
                         ctx.fillStyle = '#ffd700';
-                        ctx.fillText('Pressione E', npc.x - 70, npc.y - 90);
+                        ctx.fillText('E', npc.x - 12, npc.y - 100);
+                        ctx.fillText('INTERAGIR', npc.x - 60, npc.y - 130);
                     }
                 });
 
@@ -1011,8 +1416,6 @@
                     case 'sell':
                         this.sellItems();
                         break;
-                    case 'close':
-                        break;
                 }
             }
 
@@ -1022,7 +1425,7 @@
                 
                 Object.entries(this.player.inventory).forEach(([item, quantity]) => {
                     const itemData = ITEMS[item];
-                    if (itemData && itemData.type !== 'weapon' && itemData.type !== 'armor') {
+                    if (itemData && itemData.type === 'material') {
                         totalValue += itemData.value * quantity;
                         itemsToRemove.push(item);
                     }
@@ -1033,7 +1436,7 @@
                 this.player.updateInventoryUI();
                 this.player.updateUI();
                 
-                alert(`💰 Vendeu itens por ${totalValue} moedas!`);
+                this.player.showDropMessage(`💰 Vendeu itens por ${totalValue} moedas!`, '#ffd700');
             }
 
             closeDialog() {
@@ -1054,25 +1457,40 @@
                 this.kills = 0;
                 this.killsNeeded = 5;
                 
-                this.initDungeon();
-            }
-
-            initDungeon() {
                 const configs = {
-                    'caverna': { bg: '#2a1a0a', maxFloors: 5, boss: 'Rei Slime' },
-                    'floresta': { bg: '#0a2a1a', maxFloors: 8, boss: 'Espírito da Floresta' },
-                    'covil': { bg: '#2a0a1a', maxFloors: 10, boss: 'Dragão Ancião' }
+                    'caverna': { 
+                        bg: '#2a1a0a', 
+                        maxFloors: 5, 
+                        boss: 'Rei Slime',
+                        enemyType: 'Slime',
+                        bgGradient: ['#2a1a0a', '#1a0a0a']
+                    },
+                    'floresta': { 
+                        bg: '#0a2a1a', 
+                        maxFloors: 8, 
+                        boss: 'Espírito da Floresta',
+                        enemyType: 'Slime',
+                        bgGradient: ['#0a2a1a', '#0a1a1a']
+                    },
+                    'covil': { 
+                        bg: '#2a0a1a', 
+                        maxFloors: 10, 
+                        boss: 'Dragão Ancião',
+                        enemyType: 'Slime',
+                        bgGradient: ['#2a0a1a', '#1a0a1a']
+                    }
                 };
                 
                 const config = configs[this.type] || configs['caverna'];
                 this.background = config.bg;
+                this.bgGradient = config.bgGradient;
                 this.maxFloors = config.maxFloors;
                 this.bossName = config.boss;
+                this.enemyType = config.enemyType;
                 
                 this.spawnEnemies();
                 this.updateUI();
                 
-                // Reset player health
                 this.player.health = this.player.maxHealth;
                 const percent = (this.player.health / this.player.maxHealth) * 100;
                 document.getElementById('playerHealthFill').style.width = `${percent}%`;
@@ -1084,19 +1502,21 @@
                 this.kills = 0;
                 this.updateUI();
                 
-                const count = 5;
+                const count = 5 + Math.floor(this.floor / 2);
                 
                 for (let i = 0; i < count; i++) {
-                    const health = 50 + (this.floor * 10);
+                    const health = 40 + (this.floor * 15);
                     this.enemies.push({
-                        type: 'Slime',
+                        type: this.enemyType,
+                        name: this.enemyType,
                         health: health,
                         maxHealth: health,
-                        damage: 5 + (this.floor * 1),
+                        damage: 5 + (this.floor * 1.5),
                         x: 200 + Math.random() * 800,
                         y: 100 + Math.random() * 400,
                         sprite: '🟢',
-                        color: '#00ff00'
+                        color: '#00ff00',
+                        speed: 1 + Math.random() * 2
                     });
                 }
             }
@@ -1104,17 +1524,21 @@
             spawnBoss() {
                 this.boss = {
                     type: this.bossName,
-                    health: 500 + (this.floor * 50),
-                    maxHealth: 500 + (this.floor * 50),
-                    damage: 15 + (this.floor * 2),
+                    name: this.bossName,
+                    health: 500 + (this.floor * 100),
+                    maxHealth: 500 + (this.floor * 100),
+                    damage: 15 + (this.floor * 3),
                     x: 600,
                     y: 150,
                     sprite: '👑',
-                    color: '#ff4500'
+                    color: '#ff4500',
+                    phase: 1
                 };
                 
                 document.getElementById('bossHealthContainer').classList.remove('hidden');
+                document.getElementById('bossName').textContent = this.bossName;
                 document.getElementById('bossHealthFill').style.width = '100%';
+                this.player.showDropMessage(`👑 BOSS: ${this.bossName} apareceu!`, '#ff0000');
             }
 
             dropLoot(enemyType) {
@@ -1123,21 +1547,19 @@
                 dropTable.forEach(drop => {
                     if (Math.random() < drop.chance) {
                         this.player.addItem(drop.item);
-                        this.player.showDropMessage(`🎁 Dropou: ${drop.item}!`);
+                        this.player.showDropMessage(`🎁 Dropou: ${drop.item}!`, '#ffd700');
                     }
                 });
                 
-                // Moedas sempre dropam
-                const coins = 10 + Math.floor(Math.random() * 20);
+                const coins = 10 + Math.floor(Math.random() * 30) + (this.floor * 5);
                 this.player.coins += coins;
-                this.player.showDropMessage(`💰 +${coins} moedas!`);
+                this.player.showDropMessage(`💰 +${coins} moedas!`, '#ffd700');
                 this.player.updateUI();
             }
 
             update() {
                 if (this.state !== 'active') return;
 
-                // Update enemies
                 this.enemies = this.enemies.filter(enemy => {
                     if (enemy.health <= 0) {
                         this.dropLoot(enemy.type);
@@ -1146,29 +1568,25 @@
                         return false;
                     }
                     
-                    // Enemy movement
-                    enemy.x += Math.sin(Date.now() * 0.001) * 2;
-                    enemy.y += Math.cos(Date.now() * 0.002) * 2;
+                    enemy.x += Math.sin(Date.now() * 0.001 * enemy.speed) * 2;
+                    enemy.y += Math.cos(Date.now() * 0.002 * enemy.speed) * 2;
                     
                     enemy.x = Math.max(100, Math.min(1100, enemy.x));
                     enemy.y = Math.max(100, Math.min(600, enemy.y));
                     
-                    // Bullet collision
                     this.player.bullets.forEach((bullet, bulletIndex) => {
                         const dx = bullet.x - enemy.x;
                         const dy = bullet.y - enemy.y;
                         const distance = Math.sqrt(dx * dx + dy * dy);
                         
-                        if (distance < 30) {
+                        if (distance < 35) {
                             enemy.health -= bullet.damage;
                             this.player.bullets.splice(bulletIndex, 1);
                         }
                     });
                     
-                    // Attack player
                     if (Math.random() < 0.02) {
-                        this.player.takeDamage(enemy.damage);
-                        if (this.player.health <= 0) {
+                        if (this.player.takeDamage(enemy.damage)) {
                             this.defeat();
                         }
                     }
@@ -1176,7 +1594,6 @@
                     return true;
                 });
 
-                // Update boss
                 if (this.boss) {
                     if (this.boss.health <= 0) {
                         this.defeatBoss();
@@ -1187,7 +1604,7 @@
                         const dy = bullet.y - this.boss.y;
                         const distance = Math.sqrt(dx * dx + dy * dy);
                         
-                        if (distance < 50) {
+                        if (distance < 60) {
                             this.boss.health -= bullet.damage;
                             this.player.bullets.splice(bulletIndex, 1);
                             
@@ -1197,16 +1614,15 @@
                     });
                     
                     if (Math.random() < 0.05) {
-                        this.player.takeDamage(this.boss.damage);
-                        if (this.player.health <= 0) {
+                        if (this.player.takeDamage(this.boss.damage)) {
                             this.defeat();
                         }
                     }
                     
-                    this.boss.x = 600 + Math.sin(Date.now() * 0.0005) * 100;
+                    this.boss.x = 600 + Math.sin(Date.now() * 0.0005) * 150;
+                    this.boss.y = 150 + Math.sin(Date.now() * 0.001) * 30;
                 }
 
-                // Check progress
                 if (this.enemies.length === 0 && !this.boss) {
                     if (this.floor === this.maxFloors) {
                         this.completeDungeon();
@@ -1221,48 +1637,48 @@
             }
 
             draw(ctx) {
-                // Dungeon background
-                ctx.fillStyle = this.background;
+                const gradient = ctx.createLinearGradient(0, 0, 0, 800);
+                gradient.addColorStop(0, this.bgGradient[0]);
+                gradient.addColorStop(1, this.bgGradient[1]);
+                ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, 1200, 800);
 
-                // Ambient effects
-                ctx.fillStyle = 'rgba(255,255,255,0.05)';
-                for (let i = 0; i < 20; i++) {
+                ctx.fillStyle = 'rgba(255,255,255,0.03)';
+                for (let i = 0; i < 30; i++) {
                     ctx.beginPath();
                     ctx.arc(
-                        100 + (i * 100) + Math.sin(Date.now() * 0.001 + i) * 20,
+                        100 + (i * 40) + Math.sin(Date.now() * 0.001 + i) * 20,
                         700 + Math.cos(Date.now() * 0.001 + i) * 20,
-                        2, 0, Math.PI * 2
+                        3, 0, Math.PI * 2
                     );
                     ctx.fill();
                 }
 
-                // Enemies
                 this.enemies.forEach(enemy => {
-                    ctx.shadowBlur = 15;
+                    ctx.shadowBlur = 20;
                     ctx.shadowColor = enemy.color;
-                    ctx.font = '48px Arial';
+                    ctx.font = '56px Arial';
                     ctx.fillStyle = enemy.color;
-                    ctx.fillText(enemy.sprite, enemy.x - 24, enemy.y - 24);
+                    ctx.fillText(enemy.sprite, enemy.x - 28, enemy.y - 28);
                     
                     ctx.shadowBlur = 0;
                     ctx.fillStyle = '#ff0000';
-                    ctx.fillRect(enemy.x - 30, enemy.y - 50, 60, 5);
+                    ctx.fillRect(enemy.x - 35, enemy.y - 60, 70, 8);
                     ctx.fillStyle = '#00ff00';
-                    ctx.fillRect(enemy.x - 30, enemy.y - 50, 60 * (enemy.health / enemy.maxHealth), 5);
+                    ctx.fillRect(enemy.x - 35, enemy.y - 60, 70 * (enemy.health / enemy.maxHealth), 8);
                 });
 
-                // Boss
                 if (this.boss) {
-                    ctx.shadowBlur = 30;
+                    ctx.shadowBlur = 40;
                     ctx.shadowColor = this.boss.color;
-                    ctx.font = '64px Arial';
+                    ctx.font = '80px Arial';
                     ctx.fillStyle = this.boss.color;
-                    ctx.fillText(this.boss.sprite, this.boss.x - 32, this.boss.y - 32);
+                    ctx.fillText(this.boss.sprite, this.boss.x - 40, this.boss.y - 40);
                     
-                    ctx.font = 'bold 24px "Courier New"';
+                    ctx.shadowBlur = 20;
+                    ctx.font = 'bold 28px "Courier New"';
                     ctx.fillStyle = '#ff8c00';
-                    ctx.fillText(this.boss.type, this.boss.x - 80, this.boss.y - 80);
+                    ctx.fillText(this.boss.name, this.boss.x - 100, this.boss.y - 100);
                     ctx.shadowBlur = 0;
                 }
 
@@ -1272,8 +1688,8 @@
             nextFloor() {
                 this.floor++;
                 this.spawnEnemies();
-                this.player.heal(Math.floor(this.player.maxHealth * 0.3));
-                this.player.showDropMessage(`✨ Avançou para o Andar ${this.floor}!`);
+                this.player.heal(Math.floor(this.player.maxHealth * 0.5));
+                this.player.showDropMessage(`✨ Avançou para o Andar ${this.floor}!`, '#00ffff');
             }
 
             defeatBoss() {
@@ -1305,25 +1721,34 @@
             }
 
             defeat() {
-                alert('💀 Você foi derrotado! Voltando ao lobby...');
-                returnToLobby();
+                this.player.showDropMessage('💀 VOCÊ MORREU!', '#ff0000');
+                setTimeout(() => {
+                    returnToLobby();
+                }, 2000);
             }
 
             updateUI() {
                 document.getElementById('dungeonName').textContent = this.type.toUpperCase();
                 document.getElementById('dungeonFloor').textContent = `Andar ${this.floor}/${this.maxFloors}`;
-                document.getElementById('dungeonKills').textContent = `💀 ${this.kills}/5`;
+                document.getElementById('dungeonKills').textContent = `${this.kills}/5`;
             }
 
             showVictoryScreen(reward) {
                 const victoryEl = document.createElement('div');
                 victoryEl.className = 'victory-screen';
                 victoryEl.innerHTML = `
-                    <h1 style="color: #ffd700;">BOSS DERROTADO!</h1>
+                    <div class="victory-title">🏆 VITÓRIA!</div>
+                    <div style="font-size: 36px; color: #ffd700; margin-bottom: 20px;">BOSS DERROTADO!</div>
                     <div class="rewards">
-                        <p>💰 +${reward.coins} moedas</p>
+                        <div style="font-size: 28px; margin-bottom: 20px;">Recompensas:</div>
+                        <div style="display: flex; justify-content: center; gap: 50px;">
+                            <div>💰 ${reward.coins} moedas</div>
+                            <div>✨ ${reward.exp || 500} XP</div>
+                        </div>
                     </div>
-                    <button class="menu-btn primary" onclick="continueDungeon()">PRÓXIMO ANDAR</button>
+                    <button class="menu-btn primary" onclick="continueDungeon()" style="font-size: 24px; padding: 15px 40px;">
+                        PRÓXIMO ANDAR
+                    </button>
                 `;
                 document.getElementById('dungeonScreen').appendChild(victoryEl);
             }
@@ -1332,12 +1757,18 @@
                 const completionEl = document.createElement('div');
                 completionEl.className = 'completion-screen';
                 completionEl.innerHTML = `
-                    <h1 style="color: #ffd700;">DUNGEON COMPLETA! 🏆</h1>
+                    <div class="victory-title">🏆 DUNGEON COMPLETA!</div>
+                    <div style="font-size: 32px; color: #ffd700; margin-bottom: 20px;">Parabéns, Herói!</div>
                     <div class="rewards">
-                        <p>💰 +${reward.coins} moedas</p>
-                        <p>✨ +${reward.exp} XP</p>
+                        <div style="font-size: 28px; margin-bottom: 20px;">Recompensas Finais:</div>
+                        <div style="display: flex; justify-content: center; gap: 50px;">
+                            <div>💰 ${reward.coins} moedas</div>
+                            <div>✨ ${reward.exp} XP</div>
+                        </div>
                     </div>
-                    <button class="menu-btn primary" onclick="returnToLobby()">VOLTAR AO LOBBY</button>
+                    <button class="menu-btn primary" onclick="returnToLobby()" style="font-size: 24px; padding: 15px 40px;">
+                        VOLTAR AO LOBBY
+                    </button>
                 `;
                 document.getElementById('dungeonScreen').appendChild(completionEl);
             }
@@ -1347,6 +1778,7 @@
         function startGame() {
             if (!player) {
                 player = new Player('Aventureiro', 'shadowMonarch');
+                player.updateInventoryUI();
             }
             lobby = new Lobby(player);
             
@@ -1358,6 +1790,7 @@
 
         function selectRace(race) {
             player = new Player('Aventureiro', race);
+            player.updateInventoryUI();
             startGame();
         }
 
@@ -1375,10 +1808,9 @@
 
         function showInventory() {
             if (!player) {
-                alert('❌ Inicie uma jornada primeiro!');
-                return;
+                player = new Player('Aventureiro', 'shadowMonarch');
+                player.updateInventoryUI();
             }
-            
             player.updateInventoryUI();
             document.getElementById('inventoryPanel').classList.remove('hidden');
         }
@@ -1394,13 +1826,15 @@
         }
 
         function startDungeon(type) {
-            if (!player) return;
+            if (!player) {
+                player = new Player('Aventureiro', 'shadowMonarch');
+            }
             
             currentScreen = 'dungeon';
             hideAllScreens();
             document.getElementById('dungeonScreen').classList.remove('hidden');
             document.getElementById('dungeonScreen').classList.add('active');
-            document.getElementById('dropMessage').textContent = '';
+            document.getElementById('dropMessage').classList.add('hidden');
             
             dungeon = new Dungeon(type, player);
         }
@@ -1417,6 +1851,7 @@
             document.querySelector('.completion-screen')?.remove();
             document.querySelector('.victory-screen')?.remove();
             document.getElementById('bossHealthContainer').classList.add('hidden');
+            document.getElementById('dropMessage').classList.add('hidden');
             
             lobby = new Lobby(player);
         }
@@ -1428,7 +1863,6 @@
             canvas.width = 1200;
             canvas.height = 800;
             
-            // Event listeners
             document.addEventListener('keydown', (e) => {
                 keys[e.key.toLowerCase()] = true;
                 
@@ -1437,10 +1871,14 @@
                         returnToLobby();
                     } else if (currentScreen === 'lobby') {
                         backToTitle();
+                    } else if (currentScreen === 'title') {
+                        // Fecha inventário se aberto
+                        document.getElementById('inventoryPanel').classList.add('hidden');
                     }
                 }
                 
                 if (e.key.toLowerCase() === 'i') {
+                    e.preventDefault();
                     showInventory();
                 }
                 
@@ -1470,22 +1908,19 @@
             canvas.addEventListener('mouseup', () => isMouseDown = false);
             canvas.addEventListener('mouseleave', () => isMouseDown = false);
             
-            // Auto shoot
             setInterval(() => {
                 if (isMouseDown && currentScreen === 'dungeon' && dungeon?.state === 'active' && player) {
                     player.shoot(player.x + 10, player.y - 50);
                 }
                 
-                // Update drop message timer
                 if (dropMessageTimer > 0) {
                     dropMessageTimer--;
                     if (dropMessageTimer <= 0) {
-                        document.getElementById('dropMessage').textContent = '';
+                        document.getElementById('dropMessage').classList.add('hidden');
                     }
                 }
-            }, 150);
+            }, 100);
             
-            // Game loop
             function gameLoop() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
