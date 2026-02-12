@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHADOW BULLET HELL - COMPLETO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #1a1a2e, #0a0a1a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 1200px;
+            height: 800px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.5);
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 26, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Tela de Título */
+        .title-logo {
+            font-size: 72px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 30px #8a2be2, 0 0 60px #4a0080, 0 0 100px #ffd700;
+            animation: glowPulse 2s infinite;
+            margin-bottom: 20px;
+            letter-spacing: 8px;
+        }
+
+        .title-sub {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            letter-spacing: 12px;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { text-shadow: 0 0 30px #8a2be2, 0 0 60px #4a0080, 0 0 100px #ffd700; }
+            50% { text-shadow: 0 0 50px #ffd700, 0 0 100px #8a2be2, 0 0 150px #4a0080; }
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 400px;
+        }
+
+        .menu-btn {
+            padding: 18px 30px;
+            font-size: 22px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-btn.primary {
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            color: #000;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .menu-btn:not(.primary) {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: 2px solid #8a2be2;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(138, 43, 226, 0.7);
+        }
+
+        /* Grade de Raças */
+        .race-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            padding: 40px;
+            max-width: 1000px;
+        }
+
+        .race-card {
+            background: linear-gradient(135deg, rgba(20,20,40,0.9), rgba(10,10,20,0.95));
+            border: 2px solid #8a2be2;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .race-card:hover {
+            transform: translateY(-10px);
+            border-color: #ffd700;
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.5);
+        }
+
+        .race-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+
+        .race-name {
+            font-size: 28px;
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .race-desc {
+            color: #ccc;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .race-stats {
+            color: #8a2be2;
+            font-weight: bold;
+        }
+
+        /* UI do Lobby */
+        .lobby-ui {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            z-index: 200;
+        }
+
+        .player-lobby-info {
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .npc-hint {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid #8a2be2;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .keybind {
+            background: rgba(255,215,0,0.2);
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            padding: 4px 8px;
+            margin: 0 5px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        /* Dialog NPC */
+        .npc-dialog {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(20,20,40,0.95));
+            border: 3px solid #ffd700;
+            border-radius: 20px;
+            padding: 30px;
+            z-index: 300;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        .dialog-npc-name {
+            font-size: 28px;
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .dialog-text {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .dialog-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dialog-option {
+            background: rgba(138,43,226,0.2);
+            border: 2px solid #8a2be2;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+        }
+
+        .dialog-option:hover {
+            background: #8a2be2;
+            border-color: #ffd700;
+            transform: translateX(10px);
+        }
+
+        /* Dungeon UI */
+        .dungeon-ui {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            right: 30px;
+            z-index: 200;
+        }
+
+        .dungeon-info {
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #ff4500;
+            border-radius: 15px;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .boss-health {
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #ff0000;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .boss-health-bar {
+            width: 100%;
+            height: 25px;
+            background: #330000;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #ff0000;
+        }
+
+        #bossHealthFill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff8c00);
+            transition: width 0.2s;
+        }
+
+        .health-bar {
+            width: 200px;
+            height: 15px;
+            background: #330000;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #ffd700;
+        }
+
+        #playerHealthFill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #00ff00, #00cc00);
+            transition: width 0.2s;
+        }
+
+        .version {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+        }
+
+        .back-btn {
+            margin-top: 40px;
+            padding: 12px 30px;
+            font-size: 18px;
+            background: rgba(255,0,0,0.3);
+            border: 2px solid #ff0000;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #ff0000;
+            transform: scale(1.1);
+        }
+
+        .victory-screen, .completion-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            border: 3px solid #ffd700;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            z-index: 400;
+            min-width: 500px;
+        }
+
+        .rewards {
+            margin: 30px 0;
+            font-size: 20px;
+            line-height: 2;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 18px;
+            z-index: 150;
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Tela de Título -->
+        <div id="titleScreen" class="screen active">
+            <div class="title-logo">SHADOW BULLET HELL</div>
+            <div class="title-sub">RPG × Bullet Hell</div>
+            
+            <div class="menu-buttons">
+                <button class="menu-btn primary" onclick="startGame()">▶ INICIAR JORNADA</button>
+                <button class="menu-btn" onclick="showCharacterSelect()">📋 SELECIONAR RAÇA</button>
+                <button class="menu-btn" onclick="alert('Em desenvolvimento!')">⚙ OPÇÕES</button>
+                <button class="menu-btn" onclick="alert('Shadow Bullet Hell RPG\nVersão 1.0.0')">📜 CRÉDITOS</button>
+            </div>
+            
+            <div class="version">v1.0.0 - Era das Sombras</div>
+        </div>
+        
+        <!-- Tela de Seleção de Raça -->
+        <div id="characterSelect" class="screen">
+            <h1 style="color: #ffd700; margin-bottom: 30px;">ESCOLHA SUA RAÇA</h1>
+            <div class="race-grid">
+                <div class="race-card" onclick="selectRace('shadowMonarch')">
+                    <div class="race-icon">👑</div>
+                    <div class="race-name">Shadow Monarch</div>
+                    <div class="race-desc">Rei das Sombras - Dano +50%</div>
+                    <div class="race-stats">ATK: ⭐⭐⭐⭐⭐ | VIDA: ⭐⭐⭐</div>
+                </div>
+                <div class="race-card" onclick="selectRace('quincy')">
+                    <div class="race-icon">🏹</div>
+                    <div class="race-name">Quincy Vollständig</div>
+                    <div class="race-desc">Arqueiro Celestial - Velocidade +30%</div>
+                    <div class="race-stats">ATK: ⭐⭐⭐⭐ | VIDA: ⭐⭐</div>
+                </div>
+                <div class="race-card" onclick="selectRace('hollow')">
+                    <div class="race-icon">👹</div>
+                    <div class="race-name">Vasto Lorde</div>
+                    <div class="race-desc">Hollow Supremo - Vida +50%</div>
+                    <div class="race-stats">ATK: ⭐⭐⭐ | VIDA: ⭐⭐⭐⭐</div>
+                </div>
+                <div class="race-card" onclick="selectRace('joestar')">
+                    <div class="race-icon">🌟</div>
+                    <div class="race-name">Joestar</div>
+                    <div class="race-desc">Linhagem Heróica - Dano +30%</div>
+                    <div class="race-stats">ATK: ⭐⭐⭐⭐ | VIDA: ⭐⭐⭐</div>
+                </div>
+            </div>
+            <button class="back-btn" onclick="backToTitle()">VOLTAR</button>
+        </div>
+        
+        <!-- Tela do Lobby -->
+        <div id="lobbyScreen" class="screen">
+            <div class="lobby-ui">
+                <div class="player-lobby-info">
+                    <span id="lobbyPlayerName">Shadow Monarch</span>
+                    <span id="lobbyPlayerLevel">Nível 1</span>
+                    <span id="lobbyPlayerCoins">💰 0</span>
+                </div>
+                
+                <div class="npc-hint">
+                    <span class="keybind">[E]</span> Falar com NPC
+                    <span class="keybind">[WASD]</span> Mover
+                    <span class="keybind">[ESC]</span> Menu
+                </div>
+            </div>
+            
+            <div id="npcDialog" class="npc-dialog hidden">
+                <div class="dialog-npc-name"></div>
+                <div class="dialog-text"></div>
+                <div class="dialog-options"></div>
+            </div>
+        </div>
+        
+        <!-- Tela da Dungeon -->
+        <div id="dungeonScreen" class="screen hidden">
+            <div class="dungeon-ui">
+                <div class="dungeon-info">
+                    <span id="dungeonName">CAVERNA</span>
+                    <span id="dungeonFloor">Andar 1/5</span>
+                </div>
+                
+                <div id="bossHealthContainer" class="boss-health hidden">
+                    <div class="boss-health-bar">
+                        <div id="bossHealthFill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- UI Principal -->
+        <div id="ui" class="hidden">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <span>❤️</span>
+                <div class="health-bar">
+                    <div id="playerHealthFill"></div>
+                </div>
+                <span id="healthText">100/100</span>
+            </div>
+            <div style="margin-top: 10px;">💰 <span id="coinsText">0</span></div>
+            <div>🗡️ Dano: <span id="damageText">20</span></div>
+        </div>
+    </div>
+
+    <script>
+        // ============= VARIÁVEIS GLOBAIS =============
+        let canvas, ctx;
+        let currentScreen = 'title';
+        let player = null;
+        let lobby = null;
+        let dungeon = null;
+        let keys = {};
+        let isMouseDown = false;
+        let gameLoop;
+
+        // ============= CLASSE DO JOGADOR =============
+        class Player {
+            constructor(name, race = 'shadowMonarch') {
+                this.name = name;
+                this.race = race;
+                this.level = 1;
+                this.exp = 0;
+                this.expToNext = 100;
+                this.health = 100;
+                this.maxHealth = 100;
+                this.damage = 20;
+                this.speed = 7;
+                this.coins = 500;
+                this.x = 600;
+                this.y = 400;
+                this.bullets = [];
+                
+                this.applyRaceBonus();
+            }
+
+            applyRaceBonus() {
+                switch(this.race) {
+                    case 'shadowMonarch':
+                        this.damage = Math.floor(this.damage * 1.5);
+                        break;
+                    case 'quincy':
+                        this.damage = Math.floor(this.damage * 1.2);
+                        this.speed = Math.floor(this.speed * 1.3);
+                        break;
+                    case 'hollow':
+                        this.maxHealth = Math.floor(this.maxHealth * 1.5);
+                        this.health = this.maxHealth;
+                        break;
+                    case 'joestar':
+                        this.damage = Math.floor(this.damage * 1.3);
+                        break;
+                }
+            }
+
+            shoot(targetX, targetY) {
+                const dx = targetX - this.x;
+                const dy = targetY - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > 0) {
+                    this.bullets.push({
+                        x: this.x,
+                        y: this.y,
+                        vx: (dx / distance) * 12,
+                        vy: (dy / distance) * 12,
+                        damage: this.damage,
+                        color: '#8a2be2',
+                        radius: 6
+                    });
+                }
+            }
+
+            takeDamage(amount) {
+                this.health -= amount;
+                if (this.health < 0) this.health = 0;
+                
+                const percent = (this.health / this.maxHealth) * 100;
+                document.getElementById('playerHealthFill').style.width = `${percent}%`;
+                document.getElementById('healthText').innerHTML = `${Math.floor(this.health)}/${this.maxHealth}`;
+                
+                return this.health <= 0;
+            }
+
+            heal(amount) {
+                this.health = Math.min(this.health + amount, this.maxHealth);
+                const percent = (this.health / this.maxHealth) * 100;
+                document.getElementById('playerHealthFill').style.width = `${percent}%`;
+                document.getElementById('healthText').innerHTML = `${Math.floor(this.health)}/${this.maxHealth}`;
+            }
+
+            update() {
+                this.bullets = this.bullets.filter(b => {
+                    b.x += b.vx;
+                    b.y += b.vy;
+                    return b.x > 0 && b.x < 1200 && b.y > 0 && b.y < 800;
+                });
+            }
+
+            draw(ctx) {
+                this.bullets.forEach(b => {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = b.color;
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = b.color;
+                    ctx.fill();
+                });
+                ctx.shadowBlur = 0;
+                
+                // Desenhar jogador
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#8a2be2';
+                ctx.font = '48px Arial';
+                ctx.fillStyle = '#ffd700';
+                ctx.fillText('⚔️', this.x - 24, this.y - 24);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // ============= CLASSE DO LOBBY =============
+        class Lobby {
+            constructor(player) {
+                this.player = player;
+                this.npcs = [];
+                this.nearbyNPC = null;
+                this.activeDialog = false;
+                
+                this.initNPCs();
+            }
+
+            initNPCs() {
+                this.npcs = [
+                    {
+                        id: 'dungeon_master',
+                        name: '🏰 MESTRE DA DUNGEON',
+                        x: 400,
+                        y: 300,
+                        sprite: '👑',
+                        color: '#ffd700',
+                        dialog: {
+                            welcome: 'Bem-vindo, aventureiro! Deseja entrar em uma dungeon?',
+                            options: [
+                                { text: '⚔️ Dungeon da Caverna (Nível 1+)', action: 'dungeon', dungeon: 'caverna' },
+                                { text: '🌳 Floresta dos Espíritos (Nível 10+)', action: 'dungeon', dungeon: 'floresta' },
+                                { text: '🔥 Covil do Dragão (Nível 25+)', action: 'dungeon', dungeon: 'covil' },
+                                { text: '❌ Cancelar', action: 'close' }
+                            ]
+                        }
+                    },
+                    {
+                        id: 'blacksmith',
+                        name: '🔨 FERREIRO DAS SOMBRAS',
+                        x: 800,
+                        y: 500,
+                        sprite: '⚒️',
+                        color: '#ff8c00',
+                        dialog: {
+                            welcome: 'Precisa de armas? Tenho itens lendários!',
+                            options: [
+                                { text: '🛠️ Melhorar Arma (500 moedas)', action: 'upgrade' },
+                                { text: '❌ Sair', action: 'close' }
+                            ]
+                        }
+                    },
+                    {
+                        id: 'merchant',
+                        name: '💰 MERCADOR VIAJANTE',
+                        x: 200,
+                        y: 600,
+                        sprite: '🧙',
+                        color: '#00ff00',
+                        dialog: {
+                            welcome: 'Mercadorias raras!',
+                            options: [
+                                { text: '🛒 Comprar Poção (50 moedas)', action: 'potion' },
+                                { text: '❌ Sair', action: 'close' }
+                            ]
+                        }
+                    }
+                ];
+            }
+
+            update() {
+                // Movimento
+                if (keys.w || keys.arrowup) this.player.y -= 5;
+                if (keys.s || keys.arrowdown) this.player.y += 5;
+                if (keys.a || keys.arrowleft) this.player.x -= 5;
+                if (keys.d || keys.arrowright) this.player.x += 5;
+
+                this.player.x = Math.max(50, Math.min(1150, this.player.x));
+                this.player.y = Math.max(50, Math.min(750, this.player.y));
+
+                // Verificar proximidade com NPCs
+                this.nearbyNPC = null;
+                let minDistance = 100;
+
+                this.npcs.forEach(npc => {
+                    const dx = this.player.x - npc.x;
+                    const dy = this.player.y - npc.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        this.nearbyNPC = npc;
+                    }
+                });
+
+                // Atualizar UI
+                document.getElementById('lobbyPlayerName').textContent = 
+                    this.player.race === 'shadowMonarch' ? 'Shadow Monarch' : 
+                    this.player.race === 'quincy' ? 'Quincy' : 
+                    this.player.race === 'hollow' ? 'Vasto Lorde' : 'Joestar';
+                document.getElementById('lobbyPlayerLevel').textContent = `Nível ${this.player.level}`;
+                document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
+            }
+
+            draw(ctx) {
+                // Fundo
+                ctx.fillStyle = '#1a2a3a';
+                ctx.fillRect(0, 0, 1200, 800);
+
+                // Grade
+                ctx.strokeStyle = 'rgba(138, 43, 226, 0.2)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 1200; i += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, 800);
+                    ctx.stroke();
+                }
+                for (let i = 0; i < 800; i += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(1200, i);
+                    ctx.stroke();
+                }
+
+                // NPCs
+                this.npcs.forEach(npc => {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = npc.color;
+                    ctx.font = '48px Arial';
+                    ctx.fillStyle = npc.color;
+                    ctx.fillText(npc.sprite, npc.x - 24, npc.y - 24);
+                    
+                    ctx.shadowBlur = 10;
+                    ctx.font = 'bold 16px "Courier New"';
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(npc.name, npc.x - 60, npc.y - 50);
+                    ctx.shadowBlur = 0;
+
+                    if (this.nearbyNPC === npc) {
+                        ctx.strokeStyle = '#ffd700';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(npc.x, npc.y, 50, 0, Math.PI * 2);
+                        ctx.stroke();
+                        
+                        ctx.font = '20px Arial';
+                        ctx.fillStyle = '#ffd700';
+                        ctx.fillText('Pressione E', npc.x - 70, npc.y - 90);
+                    }
+                });
+
+                // Jogador
+                this.player.draw(ctx);
+            }
+
+            openDialog(npc) {
+                this.activeDialog = true;
+                const dialogEl = document.getElementById('npcDialog');
+                dialogEl.querySelector('.dialog-npc-name').textContent = npc.name;
+                dialogEl.querySelector('.dialog-text').textContent = npc.dialog.welcome;
+                
+                const optionsEl = dialogEl.querySelector('.dialog-options');
+                optionsEl.innerHTML = '';
+                
+                npc.dialog.options.forEach(option => {
+                    const btn = document.createElement('button');
+                    btn.className = 'dialog-option';
+                    btn.textContent = option.text;
+                    btn.onclick = () => this.handleDialogAction(option);
+                    optionsEl.appendChild(btn);
+                });
+                
+                dialogEl.classList.remove('hidden');
+            }
+
+            handleDialogAction(option) {
+                this.closeDialog();
+                
+                switch(option.action) {
+                    case 'dungeon':
+                        startDungeon(option.dungeon);
+                        break;
+                    case 'upgrade':
+                        if (this.player.coins >= 500) {
+                            this.player.coins -= 500;
+                            this.player.damage += 10;
+                            document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
+                            alert('✅ Arma melhorada! Dano +10');
+                        } else {
+                            alert('❌ Moedas insuficientes!');
+                        }
+                        break;
+                    case 'potion':
+                        if (this.player.coins >= 50) {
+                            this.player.coins -= 50;
+                            this.player.heal(30);
+                            document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
+                            alert('✅ Poção usada! Vida +30');
+                        } else {
+                            alert('❌ Moedas insuficientes!');
+                        }
+                        break;
+                    case 'close':
+                        break;
+                }
+            }
+
+            closeDialog() {
+                this.activeDialog = false;
+                document.getElementById('npcDialog').classList.add('hidden');
+            }
+        }
+
+        // ============= CLASSE DA DUNGEON =============
+        class Dungeon {
+            constructor(type, player) {
+                this.type = type;
+                this.player = player;
+                this.floor = 1;
+                this.enemies = [];
+                this.boss = null;
+                this.state = 'active';
+                
+                this.initDungeon();
+            }
+
+            initDungeon() {
+                const configs = {
+                    'caverna': { bg: '#2a1a0a', maxFloors: 5, boss: 'Rei Slime' },
+                    'floresta': { bg: '#0a2a1a', maxFloors: 8, boss: 'Espírito da Floresta' },
+                    'covil': { bg: '#2a0a1a', maxFloors: 10, boss: 'Dragão Ancião' }
+                };
+                
+                const config = configs[this.type] || configs['caverna'];
+                this.background = config.bg;
+                this.maxFloors = config.maxFloors;
+                this.bossName = config.boss;
+                
+                this.spawnEnemies();
+                this.updateUI();
+                
+                // Resetar vida do jogador
+                this.player.health = this.player.maxHealth;
+                const percent = (this.player.health / this.player.maxHealth) * 100;
+                document.getElementById('playerHealthFill').style.width = `${percent}%`;
+                document.getElementById('healthText').innerHTML = `${Math.floor(this.player.health)}/${this.player.maxHealth}`;
+            }
+
+            spawnEnemies() {
+                this.enemies = [];
+                const count = 3 + Math.floor(this.floor / 2);
+                
+                for (let i = 0; i < count; i++) {
+                    const health = 50 + (this.floor * 20);
+                    this.enemies.push({
+                        type: 'Slime',
+                        health: health,
+                        maxHealth: health,
+                        damage: 5 + (this.floor * 2),
+                        x: 200 + Math.random() * 800,
+                        y: 100 + Math.random() * 400,
+                        sprite: '🟢',
+                        color: '#00ff00'
+                    });
+                }
+            }
+
+            spawnBoss() {
+                this.boss = {
+                    type: this.bossName,
+                    health: 500 + (this.floor * 50),
+                    maxHealth: 500 + (this.floor * 50),
+                    damage: 15 + (this.floor * 2),
+                    x: 600,
+                    y: 150,
+                    sprite: '👑',
+                    color: '#ff4500'
+                };
+                
+                document.getElementById('bossHealthContainer').classList.remove('hidden');
+            }
+
+            update() {
+                if (this.state !== 'active') return;
+
+                // Atualizar inimigos
+                this.enemies = this.enemies.filter(enemy => {
+                    if (enemy.health <= 0) {
+                        this.player.coins += 50;
+                        document.getElementById('coinsText').textContent = this.player.coins;
+                        document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
+                        return false;
+                    }
+                    
+                    enemy.x += Math.sin(Date.now() * 0.001) * 2;
+                    enemy.y += Math.cos(Date.now() * 0.002) * 2;
+                    
+                    enemy.x = Math.max(100, Math.min(1100, enemy.x));
+                    enemy.y = Math.max(100, Math.min(600, enemy.y));
+                    
+                    return true;
+                });
+
+                // Atualizar boss
+                if (this.boss) {
+                    if (this.boss.health <= 0) {
+                        this.defeatBoss();
+                    }
+                    
+                    const percent = (this.boss.health / this.boss.maxHealth) * 100;
+                    document.getElementById('bossHealthFill').style.width = `${percent}%`;
+                    
+                    this.boss.x = 600 + Math.sin(Date.now() * 0.0005) * 100;
+                }
+
+                // Verificar progresso
+                if (this.enemies.length === 0 && !this.boss) {
+                    if (this.floor === this.maxFloors) {
+                        this.completeDungeon();
+                    } else if (this.floor === this.maxFloors - 1) {
+                        this.spawnBoss();
+                    } else {
+                        this.nextFloor();
+                    }
+                }
+
+                this.updateUI();
+            }
+
+            draw(ctx) {
+                ctx.fillStyle = this.background;
+                ctx.fillRect(0, 0, 1200, 800);
+
+                // Inimigos
+                this.enemies.forEach(enemy => {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = enemy.color;
+                    ctx.font = '48px Arial';
+                    ctx.fillStyle = enemy.color;
+                    ctx.fillText(enemy.sprite, enemy.x - 24, enemy.y - 24);
+                    
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillRect(enemy.x - 30, enemy.y - 50, 60, 5);
+                    ctx.fillStyle = '#00ff00';
+                    ctx.fillRect(enemy.x - 30, enemy.y - 50, 60 * (enemy.health / enemy.maxHealth), 5);
+                });
+
+                // Boss
+                if (this.boss) {
+                    ctx.shadowBlur = 30;
+                    ctx.shadowColor = this.boss.color;
+                    ctx.font = '64px Arial';
+                    ctx.fillStyle = this.boss.color;
+                    ctx.fillText(this.boss.sprite, this.boss.x - 32, this.boss.y - 32);
+                    
+                    ctx.font = 'bold 24px "Courier New"';
+                    ctx.fillStyle = '#ff8c00';
+                    ctx.fillText(this.boss.type, this.boss.x - 80, this.boss.y - 80);
+                    ctx.shadowBlur = 0;
+                }
+
+                // Jogador
+                this.player.draw(ctx);
+                
+                // Andar atual
+                ctx.font = 'bold 24px "Courier New"';
+                ctx.fillStyle = 'white';
+                ctx.fillText(`Andar ${this.floor}/${this.maxFloors}`, 20, 50);
+            }
+
+            nextFloor() {
+                this.floor++;
+                this.spawnEnemies();
+                this.player.heal(Math.floor(this.player.maxHealth * 0.3));
+            }
+
+            defeatBoss() {
+                const reward = {
+                    coins: 500 * this.floor,
+                    items: ['Shadow Fragment']
+                };
+                
+                this.player.coins += reward.coins;
+                document.getElementById('coinsText').textContent = this.player.coins;
+                document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
+                
+                this.showVictoryScreen(reward);
+                this.boss = null;
+                document.getElementById('bossHealthContainer').classList.add('hidden');
+            }
+
+            completeDungeon() {
+                const reward = {
+                    coins: 2000 * this.maxFloors,
+                    exp: 1000 * this.maxFloors
+                };
+                
+                this.player.coins += reward.coins;
+                document.getElementById('coinsText').textContent = this.player.coins;
+                document.getElementById('lobbyPlayerCoins').textContent = `💰 ${this.player.coins}`;
+                
+                this.showCompletionScreen(reward);
+                this.state = 'completed';
+            }
+
+            updateUI() {
+                document.getElementById('dungeonName').textContent = 
+                    this.type.toUpperCase();
+                document.getElementById('dungeonFloor').textContent = 
+                    `Andar ${this.floor}/${this.maxFloors}`;
+            }
+
+            showVictoryScreen(reward) {
+                const victoryEl = document.createElement('div');
+                victoryEl.className = 'victory-screen';
+                victoryEl.innerHTML = `
+                    <h1 style="color: #ffd700;">BOSS DERROTADO!</h1>
+                    <div class="rewards">
+                        <p>💰 +${reward.coins} moedas</p>
+                        <p>🎁 Items: ${reward.items.join(', ')}</p>
+                    </div>
+                    <button class="menu-btn primary" onclick="continueDungeon()">PRÓXIMO ANDAR</button>
+                `;
+                document.getElementById('dungeonScreen').appendChild(victoryEl);
+            }
+
+            showCompletionScreen(reward) {
+                const completionEl = document.createElement('div');
+                completionEl.className = 'completion-screen';
+                completionEl.innerHTML = `
+                    <h1 style="color: #ffd700;">DUNGEON COMPLETA! 🏆</h1>
+                    <div class="rewards">
+                        <p>💰 +${reward.coins} moedas</p>
+                        <p>✨ +${reward.exp} XP</p>
+                    </div>
+                    <button class="menu-btn primary" onclick="returnToLobby()">VOLTAR AO LOBBY</button>
+                `;
+                document.getElementById('dungeonScreen').appendChild(completionEl);
+            }
+        }
+
+        // ============= FUNÇÕES DE NAVEGAÇÃO =============
+        function startGame() {
+            if (!player) {
+                player = new Player('Aventureiro', 'shadowMonarch');
+            }
+            lobby = new Lobby(player);
+            
+            currentScreen = 'lobby';
+            hideAllScreens();
+            document.getElementById('lobbyScreen').classList.add('active');
+            document.getElementById('ui').classList.remove('hidden');
+        }
+
+        function selectRace(race) {
+            player = new Player('Aventureiro', race);
+            startGame();
+        }
+
+        function showCharacterSelect() {
+            hideAllScreens();
+            document.getElementById('characterSelect').classList.add('active');
+        }
+
+        function backToTitle() {
+            currentScreen = 'title';
+            hideAllScreens();
+            document.getElementById('titleScreen').classList.add('active');
+            document.getElementById('ui').classList.add('hidden');
+        }
+
+        function hideAllScreens() {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+        }
+
+        function startDungeon(type) {
+            currentScreen = 'dungeon';
+            hideAllScreens();
+            document.getElementById('dungeonScreen').classList.remove('hidden');
+            document.getElementById('dungeonScreen').classList.add('active');
+            
+            dungeon = new Dungeon(type, player);
+        }
+
+        function continueDungeon() {
+            dungeon.nextFloor();
+            document.querySelector('.victory-screen')?.remove();
+        }
+
+        function returnToLobby() {
+            currentScreen = 'lobby';
+            hideAllScreens();
+            document.getElementById('lobbyScreen').classList.add('active');
+            document.querySelector('.completion-screen')?.remove();
+            document.querySelector('.victory-screen')?.remove();
+            document.getElementById('bossHealthContainer').classList.add('hidden');
+            
+            lobby = new Lobby(player);
+        }
+
+        // ============= CONTROLES =============
+        window.onload = function() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = 1200;
+            canvas.height = 800;
+            
+            // Event listeners
+            document.addEventListener('keydown', (e) => {
+                keys[e.key.toLowerCase()] = true;
+                
+                if (e.key === 'Escape') {
+                    if (currentScreen === 'dungeon') {
+                        returnToLobby();
+                    }
+                }
+                
+                if (e.key.toLowerCase() === 'e' && currentScreen === 'lobby' && lobby?.nearbyNPC && !lobby?.activeDialog) {
+                    lobby.openDialog(lobby.nearbyNPC);
+                }
+            });
+            
+            document.addEventListener('keyup', (e) => {
+                keys[e.key.toLowerCase()] = false;
+            });
+            
+            canvas.addEventListener('click', (e) => {
+                if (currentScreen === 'dungeon' && dungeon?.state === 'active') {
+                    const rect = canvas.getBoundingClientRect();
+                    const scaleX = canvas.width / rect.width;
+                    const scaleY = canvas.height / rect.height;
+                    
+                    const canvasX = (e.clientX - rect.left) * scaleX;
+                    const canvasY = (e.clientY - rect.top) * scaleY;
+                    
+                    player.shoot(canvasX, canvasY);
+                }
+            });
+            
+            canvas.addEventListener('mousedown', () => isMouseDown = true);
+            canvas.addEventListener('mouseup', () => isMouseDown = false);
+            canvas.addEventListener('mouseleave', () => isMouseDown = false);
+            
+            // Disparo automático
+            setInterval(() => {
+                if (isMouseDown && currentScreen === 'dungeon' && dungeon?.state === 'active') {
+                    player.shoot(player.x + 10, player.y - 50);
+                }
+            }, 200);
+            
+            gameLoop();
+        };
+
+        // ============= LOOP PRINCIPAL =============
+        function gameLoop() {
+            if (currentScreen === 'lobby' && lobby) {
+                lobby.update();
+                lobby.draw(ctx);
+            }
+            
+            if (currentScreen === 'dungeon' && dungeon) {
+                dungeon.update();
+                dungeon.draw(ctx);
+                player.update();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
